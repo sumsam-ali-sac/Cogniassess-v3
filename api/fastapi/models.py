@@ -1,0 +1,36 @@
+from pydantic import BaseModel
+from typing import Optional, List, Dict
+
+
+class TextData(BaseModel):
+    userId: str
+    extractedText: str
+
+
+class Question(BaseModel):
+    id: str
+    text: str
+
+
+class Info(BaseModel):
+    role: str
+    domain: str
+    questions: List[Question]
+
+
+class GenerationRequest(BaseModel):
+    selectedDomain: str
+    selectedRole: str
+
+
+class GenerationResponse(BaseModel):
+    questions: Dict[str, str]
+
+
+class GenerationResponse(BaseModel):
+    questions: List[Info]
+
+
+class TextData(BaseModel):
+    userId: str
+    extractedText: str
