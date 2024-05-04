@@ -1,19 +1,13 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import ChatContent from "../components/ChatContent";
-import SideNav from "../components/Sidenav";
-import ChatInput from "../components/ChatInput";
+import Chat from "../components/Chat";
+import Sidebar from "../components/Sidebar";
 export default function FeedbackBot() {
 	return (
-		<div className="min-h-screen bg-gray-900 text-white">
-			<Navbar />
-			<div className="flex">
-				<SideNav />
-				<ChatContent />
-			</div>
-			<ChatInput />
-			<Footer />
+		<div className="flex h-screen bg-gray-200">
+			{/* <Sidebar /> */}
+			<Chat />
 		</div>
 	);
 }

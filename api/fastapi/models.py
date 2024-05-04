@@ -21,6 +21,7 @@ class Info(BaseModel):
 class GenerationRequest(BaseModel):
     selectedDomain: str
     selectedRole: str
+    cvContent: str
 
 
 class GenerationResponse(BaseModel):

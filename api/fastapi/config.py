@@ -31,8 +31,8 @@ class Settings(BaseSettings):
     mongo_uri: str = os.getenv("MONGO")
     log_level: str = "INFO"
     db_name: str = "cogniassess"
-    moster_api: str = os.getenv("MONSTER_API_KEY")
-    deployment_id: str = ""
+    monster_api: str = os.getenv("MONSTER_API_KEY")
+    deployment_id: str = "077095dc-adac-44bd-8326-93670bd41cb0"
     OneShotExample: str = """
     {
     "role": "Selected Role",
@@ -67,27 +67,21 @@ class Settings(BaseSettings):
 
     """
 
-    PastExperience: str = ""
-    Weaknesses: str = ""
-    Strengths: str = ""
+    CandidateContext: str = ""
 
-    @property
-    def headers(self):
-        return {"Authorization": f"Bearer {self.api_url}"}
+    def setCandidateContext(self, CandidateContext):
+        self.CandidateContext = CandidateContext
 
-    @property
     def getClient(self):
-        deploy_client = mclient(api_key=self.moster_api)
+        deploy_client = mclient(api_key=self.monster_api)
         return deploy_client
 
     def setDeploymentID(self, deployment_id):
         self.deployment_id = deployment_id
 
-    @property
     def getDeploymentID(self):
         return self.deployment_id
 
-    @property
     def getStatus(self):
         deploy_client = self.getClient()
         status_ret = deploy_client.get_deployment_status(
@@ -97,7 +91,9 @@ class Settings(BaseSettings):
     def UserPrompt(self, Role: str, Domain: str) -> str:
         UserQuery = f"""
 
-        Formulate questions object that are directly relevant to the {Role} and  {Domain}. These questions should reflect
+        Candidate Context: {self.CandidateContext}
+
+        Formulate questions object that are directly relevant to the {Role} and  {Domain} and the candidate. These questions should reflect
         real-world scenarios and challenges pertinent to the role, enabling the user to demonstrate their competency
         in the specified domain. Ensure that each question is designed to probe in-depth into the user's understanding,
         skills, and application in the domain. Your questions should not be generic but rather specific to the nuances
@@ -112,15 +108,14 @@ class Settings(BaseSettings):
 
         Generate only one Json Object
 
+
         """
         return UserQuery
 
-    @property
     def GetServiceClient(self):
         status_ret = self.getStatus()
         return mclient(api_key=status_ret.get("api_auth_token"), base_url=status_ret.get("URL"))
 
-    @property
     class Config:
         env_file = ".env"
 

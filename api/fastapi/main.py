@@ -3,11 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
+from monsterapi import client as mclient
 import json
 from config import settings
 from logger import get_logger
 from models import TextData, GenerationRequest, GenerationResponse, Info, Question
 import time
+import os
 app = FastAPI()
 
 app.add_middleware(
@@ -38,6 +40,7 @@ async def mongodb_connection(app: FastAPI):
 
 app = FastAPI(lifespan=mongodb_connection)
 
+CandidateContext = ""
 
 # API endpoints
 
@@ -62,6 +65,28 @@ async def process_text(data: TextData):
 @app.post("/generate-questions/")
 async def generate_questions(request: GenerationRequest):
 
+    # summary_client = mclient(api_key=os.getenv("MONSTER_API_KEY"))
+    # deploy_client = mclient(api_key=os.getenv("MONSTER_API_KEY"))
+
+    if settings.CandidateContext == "":
+        summary_client = settings.getClient()
+        model = "mpt-7b-instruct"
+
+        SummaryData = {
+            "prompt": f"""
+            Analyze the CV provided and summarize it in short, the summary should capture the essence of the candidate's professional 
+            profile and qualifications while keeping the summary short.
+
+            Please summarize the following CV:
+            {request.cvContent}
+            """,
+            "max_length": 256
+        }
+
+        CandidateContext = summary_client.generate(model, SummaryData)
+        settings.setCandidateContext(CandidateContext)
+        print(CandidateContext)
+
     questions_list = []
 
     payload = {
@@ -71,26 +96,26 @@ async def generate_questions(request: GenerationRequest):
         "max_tokens": 200,
     }
 
-    # service_client = settings.GetServiceClient()
-    # output = service_client.generate(model="deploy-llm", data=payload)
+    service_client = settings.GetServiceClient()
+    output = service_client.generate(model="deploy-llm", data=payload)
 
-    # res = json.loads(output)['text'][0].split('\n\n')[0]
-    res = """
-    {
-        "role": "Human Resource Manager",
-        "domain": "Diversity and Inclusion",
-        "questions": [
-            {
-                "id": "Q1",
-                "text": "How do you ensure that the recruitment process is inclusive and diverse?"
-            },
-            {
-                "id": "Q2",
-                "text": "Can you discuss your experience with training and development programs for diverse employees?"
-            }
-        ]
-    }
-    """
+    res = json.loads(output)['text'][0].split('\n\n')[0]
+    # res = """
+    # {
+    #     "role": "Human Resource Manager",
+    #     "domain": "Diversity and Inclusion",
+    #     "questions": [
+    #         {
+    #             "id": "Q1",
+    #             "text": "How do you ensure that the recruitment process is inclusive and diverse?"
+    #         },
+    #         {
+    #             "id": "Q2",
+    #             "text": "Can you discuss your experience with training and development programs for diverse employees?"
+    #         }
+    #     ]
+    # }
+    # """
 
     obj = json.loads(res)
     obj["domain"] = request.selectedDomain

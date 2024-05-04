@@ -12,6 +12,8 @@ export default function Assessment() {
 		(state) => state.domains.selectedDomains
 	);
 	const selectedRole = useSelector((state) => state.roles.selectedRole);
+	const user = useSelector((state) => state.user.user);
+
 	const questionsState = useSelector((state) => state.questions);
 	const [AssessmentTableConfig, setAssessmentTableConfig] = useState([]);
 	const [isUploading, setIsUploading] = useState(false);
@@ -37,6 +39,7 @@ export default function Assessment() {
 						.post("api/node/assessment/generate", {
 							selectedDomain: selectedDomains[key],
 							selectedRole: selectedRole,
+							userId: user.id,
 						})
 						.then((response) => ({
 							domain: response.data.questions[0].domain,
