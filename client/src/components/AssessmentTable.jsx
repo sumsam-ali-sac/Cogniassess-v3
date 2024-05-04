@@ -1,12 +1,15 @@
 import React from "react";
 import TableHeader from "./TableHeader";
 import TableRow from "./TableRow";
+import { useNavigate } from "react-router-dom";
 
 const AssessmentTable = ({ Assessments, allQuestionsSolved }) => {
+	const navigate = useNavigate();
 	const handleSubmitAssessment = () => {
 		console.log("Submitting Assessment...");
-		// Further submission logic here
+		navigate("/points");
 	};
+
 	return (
 		<div className="flex mt-12 items-center justify-center mx-auto h-screen bg-dark-gray">
 			<div className="bg-neutral-800 shadow-lg rounded-xl overflow-hidden w-3/4">

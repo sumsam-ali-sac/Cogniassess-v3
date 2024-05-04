@@ -2,42 +2,44 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import PointsCard from "../components/PointsCard";
+import Spinner from "../components/Spinner"; // Assuming this is your spinner component
 import { useSelector } from "react-redux";
 import axios from "axios";
 
 export default function Points() {
 	const questions = useSelector((state) => state.questions);
+	const role = useSelector((state) => state.roles.selectedRole);
+
 	const [points, setPoints] = useState(0);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true); // Start as true since we're loading immediately
 
-	// useEffect(() => {
-	// 	const evaluateQuestions = async () => {
-	// 		setIsLoading(true);
-	// 		try {
-	// 			const response = await axios.post(
-	// 				"api/node/assessment/evaluate",
-	// 				{
-	// 					questions,
-	// 				}
-	// 			);
-	// 			setPoints(response.data.points);
-	// 		} catch (error) {
-	// 			console.error("Error evaluating questions:", error);
-	// 		}
-	// 		setIsLoading(false);
-	// 	};
+	useEffect(() => {
+		const evaluateQuestions = async () => {
+			try {
+				const response = await axios.post(
+					"api/node/assessment/evaluate",
+					{
+						questions,
+						role,
+					}
+				);
+				setPoints(response.data.points);
+			} catch (error) {
+				console.error("Error evaluating questions:", error);
+			}
+			setIsLoading(false);
+		};
 
-	// 	if (questions.length > 0) {
-	// 		evaluateQuestions();
-	// 	}
-	// }, [questions]);
+		// Run this immediately after component mounts
+		evaluateQuestions();
+	}, []); // Empty dependency array means this runs only once, when the component mounts
 
 	return (
 		<div className="flex flex-col bg-dark-gray min-h-screen justify-between">
 			<Navbar />
 			<div className="flex flex-col items-center justify-center">
 				{isLoading ? (
-					<p>Loading...</p>
+					<Spinner /> // Show spinner while loading
 				) : (
 					<PointsCard
 						number={1}

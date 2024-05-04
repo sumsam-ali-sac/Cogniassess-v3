@@ -13,7 +13,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 var assessmentRouter = _express["default"].Router();
 
-assessmentRouter.post("/generate", _assessmentController.generate); // assessmentRouter.post("/evaluate", evaluate);
-
+assessmentRouter.post("/generate", _assessmentController.generate);
+assessmentRouter.post("/evaluate", _assessmentController.evaluate);
 var _default = assessmentRouter;
 exports["default"] = _default;

@@ -46,5 +46,31 @@ export const generate = async (req, res) => {
 };
 
 export const evaluate = async (req, res) => {
-	// Your implementation for evaluate
+	const { questions, role } = req.body;
+	if (!questions || questions.length === 0) {
+		return res
+			.status(400)
+			.json({ error: "No questions provided for evaluation." });
+	}
+	const result = {};
+	questions.forEach((entry) => {
+		const { progress, status, ...filteredData } = entry;
+		filteredData.questions = filteredData.questions.map(
+			({ id, solved, text: question, ...rest }) => ({
+				question,
+				...rest,
+			})
+		);
+		const str = JSON.stringify(filteredData);
+
+		console.log(str);
+
+		// console.log(str);
+
+		// console.log(result);
+		// const prompt = `
+		// The candidate selected the role ${role} and answered mutiple questions based on multiple sub domains from this role now I want you to grade the candidate out of 100
+		// give me the score only , Base it on the following questions and answers
+		// ${results.questions}
+	});
 };
