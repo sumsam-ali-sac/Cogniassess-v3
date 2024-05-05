@@ -1,3 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+::-moz-scrollbar-button, ::-webkit-scrollbar-button {
+    width: 0px;
+  }

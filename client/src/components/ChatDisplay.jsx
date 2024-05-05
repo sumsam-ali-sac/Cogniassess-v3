@@ -1,0 +1,44 @@
+import React from "react";
+
+const ChatDisplay = ({ messages }) => {
+	return (
+		<div className="w-full h-full mb-24 bg-dark-gray overflow-y-auto scrollbar-thin scrollbar-thumb-neon-green scrollbar-track-dark-gray hover:scrollbar-thumb-hover-green">
+			<div className="bg-dark-gray h-screen">
+				{messages.map((msg, index) => (
+					<div
+						key={index}
+						className={`flex items-center p-4 ${
+							msg.sender === "user" ? "justify-end" : ""
+						}`}>
+						{msg.sender !== "user" && (
+							<img
+								src="/logo.png"
+								alt="Bot"
+								className="w-13 h-10 rounded-full mr-3"
+							/>
+						)}
+						<div
+							className={`p-4 rounded-lg ${
+								msg.sender === "user"
+									? "bg-neon-green text-neutral-700 text-right"
+									: "bg-neutral-700 text-white text-left"
+							}`}>
+							<p className="font-worksans md:tracking-wide md:text-lg">
+								{msg.text}
+							</p>
+						</div>
+						{msg.sender === "user" && (
+							<img
+								src="/Streaks logo.png"
+								alt="User"
+								className="w-10 h-10 rounded-full ml-3"
+							/>
+						)}
+					</div>
+				))}
+			</div>
+		</div>
+	);
+};
+
+export default ChatDisplay;
