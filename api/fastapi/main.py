@@ -7,7 +7,7 @@ from monsterapi import client as mclient
 import json
 from config import settings
 from logger import get_logger
-from models import TextData, GenerationRequest, GenerationResponse, Info, Question
+from models import TextData, GenerationRequest, GenerationResponse, Info, Question, QuestionAnswerData
 import time
 import os
 import re
@@ -92,6 +92,24 @@ async def process_text(data: TextData):
     return {"summary": CVsummary['text'], "analysis": CandidateContext['text'], "userId": data.userId}
 
 
+# res = """
+# {
+#     "role": "Human Resource Manager",
+#     "domain": "Diversity and Inclusion",
+#     "questions": [
+#         {
+#             "id": "Q1",
+#             "text": "How do you ensure that the recruitment process is inclusive and diverse?"
+#         },
+#         {
+#             "id": "Q2",
+#             "text": "Can you discuss your experience with training and development programs for diverse employees?"
+#         }
+#     ]
+# }
+# """
+
+
 @app.post("/analysis")
 async def analyze_cv(data: TextData):
     logger.info(f"Received user ID: {data.userId}")
@@ -126,6 +144,26 @@ async def analyze_cv(data: TextData):
         # print(CVsummary['text'])
 
     return {"summary": CVsummary['text'], "analysis": CandidateContext['text'], "userId": data.userId}
+
+
+@app.post("/evaluate")
+async def analyze_cv(data: QuestionAnswerData):
+    logger.info(f"Received user responses: {data.UserAnswers}")
+    key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
+    evaluate_client = mclient(
+        api_key=key)
+
+    evaluate_prompt = "<|User|>" + settings.UserPromptLCVcontext() + "<s>"
+
+    EvaluateData = {
+        "prompt": evaluate_prompt,
+        "max_length": "512",
+        "temprature": 0.8,
+    }
+
+    Evaluation = evaluate_client.generate(model, EvaluateData)
+
+    return {"evaluatation": Evaluation['text'], "points": 100}
 
 
 def parse_dict(text):
@@ -188,22 +226,6 @@ async def generate_questions(request: GenerationRequest):
                                                                ), "max_length": "256", "temprature": 0.8}
     response = questions_client.generate(model, questions_data)
 
-    # res = """
-    # {
-    #     "role": "Human Resource Manager",
-    #     "domain": "Diversity and Inclusion",
-    #     "questions": [
-    #         {
-    #             "id": "Q1",
-    #             "text": "How do you ensure that the recruitment process is inclusive and diverse?"
-    #         },
-    #         {
-    #             "id": "Q2",
-    #             "text": "Can you discuss your experience with training and development programs for diverse employees?"
-    #         }
-    #     ]
-    # }
-    # """
     print(response)
     # res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
     # res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")

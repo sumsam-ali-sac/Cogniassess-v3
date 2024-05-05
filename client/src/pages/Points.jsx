@@ -1,76 +1,108 @@
 import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import PointsCard from "../components/PointsCard";
-import Spinner from "../components/Spinner"; // Assuming this is your spinner component
-import { useSelector } from "react-redux";
-import axios from "axios";
+import Spinner from "../components/Spinner";
+import { setFeedback, setPoints } from "../redux/assessments/assessmentSlice";
 
 export default function Points() {
 	const questions = useSelector((state) => state.questions);
 	const role = useSelector((state) => state.roles.selectedRole);
+	const points = useSelector((state) => state.assessment.points);
+	const feedback = useSelector((state) => state.assessment.feedback);
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
-	const [points, setPoints] = useState(0);
-	const [isLoading, setIsLoading] = useState(true); // Start as true since we're loading immediately
+	const [showFeedback, setShowFeedback] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const evaluateQuestions = async () => {
-			try {
-				const response = await axios.post(
-					"api/node/assessment/evaluate",
-					{
-						questions,
-						role,
-					}
-				);
-				setPoints(response.data.points);
-			} catch (error) {
-				console.error("Error evaluating questions:", error);
-			}
-			setIsLoading(false);
-		};
+		if (points === null || feedback === null) {
+			// Check if points or feedback are not set
+			const evaluateQuestions = async () => {
+				setIsLoading(true); // Ensure loading state is triggered
+				try {
+					const response = await axios.post(
+						"api/node/assessment/evaluate",
+						{ questions, role }
+					);
+					dispatch(setPoints(response.data.points));
+					dispatch(setFeedback(response.data.feedback));
+				} catch (error) {
+					console.error("Error evaluating questions:", error);
+				}
+				setIsLoading(false);
+			};
 
-		// Run this immediately after component mounts
-		evaluateQuestions();
-	}, []); // Empty dependency array means this runs only once, when the component mounts
+			evaluateQuestions();
+		} else {
+			setIsLoading(false); // Set loading to false if values already exist
+		}
+	}, [dispatch, questions, role, points, feedback]); // Add points and feedback to the dependency array
+
+	const toggleFeedback = () => {
+		setShowFeedback(!showFeedback);
+	};
+
+	const handleGoHome = () => {
+		navigate("/");
+	};
+
+	const handleGoChat = () => {
+		navigate("/feedback-bot");
+	};
 
 	return (
-		<div className="flex flex-col bg-dark-gray min-h-screen justify-between">
+		<div className="flex flex-col min-h-screen justify-between bg-dark-gray">
 			<Navbar />
-			<div className="flex flex-col items-center justify-center">
+			<div className="container mx-auto p-4 text-center">
 				{isLoading ? (
-					<Spinner /> // Show spinner while loading
+					<Spinner text="Evaluating assessment" />
 				) : (
-					<PointsCard
-						number={1}
-						iconName="path_to_icon"
-						title="Total Points"
-						points={points}
-					/>
-				)}
-				<div className="flex flex-col">
-					<p className="text-xl mt-6 mb-4 font-rubic text-off-white font-black">
-						Want to know why?
-					</p>
+					<div className="font-worksans tracking-wide text-lg">
+						<PointsCard
+							number={1}
+							iconName="path_to_icon"
+							title="Total Points"
+							points={points}
+						/>
 
-					<button
-						className="mb-2 px-4 py-2 rounded font-rubic font-bold bg-neon-green text-neutral-900 hover:bg-neutral-900 hover:text-neon-green transition duration-300 ease-in-out transform hover:scale-110 opacity-100 cursor-pointer"
-						// onClick={handleSubmitAssessment}
-						// disabled={!allQuestionsSolved}
-					>
-						Generate Feedback
-					</button>
-					<p className="text-xl mt-6 mb-4 font-rubic text-off-white font-black">
-						Want to try another time?
-					</p>
-					<button
-						className="mb-8 px-4 py-2 rounded font-rubic font-bold bg-neon-green text-neutral-900 hover:bg-neutral-900 hover:text-neon-green transition duration-300 ease-in-out transform hover:scale-110 opacity-100 cursor-pointer"
-						// onClick={handleSubmitAssessment}
-						// disabled={!allQuestionsSolved}
-					>
-						Homepage
-					</button>
-				</div>
+						<div className="flex flex-col items-center">
+							<button
+								className="mt-6 w-full md:w-1/3 py-2 rounded bg-neon-green text-neutral-800 hover:bg-neutral-800 hover:text-neon-green transition duration-300 ease-in-out"
+								onClick={toggleFeedback}>
+								{showFeedback
+									? "Hide Feedback"
+									: "Show Feedback"}
+							</button>
+
+							<div
+								className={`overflow-hidden transition-max-height duration-700 ease-in-out ${
+									showFeedback ? "max-h-80" : "max-h-0"
+								}`}>
+								<div className="my-4 p-4 w-full md:w-1/3 mx-auto bg-gray-200 rounded shadow-md">
+									<p className="text-lg text-neutral-800">
+										{feedback}
+									</p>
+								</div>
+							</div>
+
+							<button
+								className="mt-6 mb-8 w-full md:w-1/3 py-2 rounded bg-neon-green text-neutral-800 hover:bg-neutral-800 hover:text-neon-green transition duration-300 ease-in-out"
+								onClick={handleGoChat}>
+								Chat with Cogniassess
+							</button>
+							<button
+								className="mt-6 mb-8 w-full md:w-1/3 py-2 rounded bg-neon-green text-neutral-800 hover:bg-neutral-800 hover:text-neon-green transition duration-300 ease-in-out"
+								onClick={handleGoHome}>
+								Homepage
+							</button>
+						</div>
+					</div>
+				)}
 			</div>
 			<Footer />
 		</div>

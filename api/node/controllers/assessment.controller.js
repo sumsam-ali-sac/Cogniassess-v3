@@ -3,6 +3,7 @@ import CV from "../models/cv.model.js";
 import Role from "../models/role.model.js";
 import Domain from "../models/domain.model.js";
 import mongoose from "mongoose";
+import MistralClient from "@mistralai/mistralai";
 
 export const generate = async (req, res) => {
 	let { selectedDomain, selectedRole } = req.body;
@@ -52,7 +53,7 @@ export const evaluate = async (req, res) => {
 			.status(400)
 			.json({ error: "No questions provided for evaluation." });
 	}
-	const all_questions = "";
+	let all_questions = "";
 	questions.forEach((entry) => {
 		const { progress, status, ...filteredData } = entry;
 		filteredData.questions = filteredData.questions.map(
@@ -64,8 +65,54 @@ export const evaluate = async (req, res) => {
 		const str = JSON.stringify(filteredData);
 		all_questions = all_questions + str;
 	});
-	const fastApiUrl = "http://localhost:8000/evaluate";
-	const response = await axios.post(fastApiUrl, {
-		UserAnswers,
+
+	const apiKey = process.env.MISTRAL_API_KEY;
+	const client = new MistralClient(apiKey);
+	const Evalprompt = `	
+	Candidate Responses: 
+
+	${all_questions}
+	
+	Evaluate the candidate's responses for a non-technical role based on the selected domains. Assess each answer for relevance, clarity, innovation, and how well they align with the job requirements. If responses appear to be placeholders or are inadequately detailed, this should be reflected in the evaluation. Assign a score out of 100 and provide constructive feedback.
+
+	Task:
+
+	Please ensure fairness in your evaluation Grade based on Alignment with Role Requirements, Innovation and Creativity , Clarity and Articulation , Relevance
+
+	If the asnwers are unsatisfactory give straight zero.
+
+	Return the results in a JSON object structured as follows:
+
+	{
+	"points": "Numerical score",
+	"feedback": "Textual feedback summarizing the strengths and weaknesses of the candidate’s answers. If answers are placeholders or inadequate, recommend a resubmission for a 
+		more accurate assessment."
+	}
+
+	Guidelines:
+
+	Points: This key should contain the numerical score reflecting how well the candidate's answers meet the job role and domain expectations.
+	Feedback: This key should provide feedback detailing strengths and weaknesses in the candidate's answers, including specific recommendations for improvement 
+	or reasons for resubmission.
+
+	MAKE SURE YOU FOLLOW THE JSON FORMAT GIVEN
+	`;
+
+	const chatResponse = await client.chat({
+		model: "mistral-small-latest",
+		response_format: { type: "json_object" },
+		messages: [{ role: "user", content: Evalprompt }],
 	});
+
+	const Evaluation = chatResponse.choices[0].message.content;
+
+	let obj = JSON.parse(Evaluation);
+
+	res.json({
+		message: "Answers Evaluated Successfully",
+		points: obj.points,
+		feedback: obj.feedback,
+	});
+
+	return obj;
 };

@@ -41,6 +41,8 @@ export const signin = async (req, res, next) => {
 			return next(errorHandler(404, "User not found"));
 		}
 
+		await user.updateLoginStreak();
+
 		const validPassword = await argon2.verify(user.password, password);
 		if (!validPassword) {
 			return next(errorHandler(401, "Invalid credentials"));
@@ -79,6 +81,7 @@ export const google = async (req, res, next) => {
 		const user = await User.findOne({ email: req.body.email });
 		if (user) {
 			const { password: pass, ...rest } = user._doc;
+			await user.updateLoginStreak();
 
 			const token = jwt.sign(
 				{ userId: user._id, userRole: user.userRole },

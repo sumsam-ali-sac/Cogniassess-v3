@@ -14,12 +14,13 @@ import userReducer from "./user/userSlice";
 import domainsReducer from "./domains/domainsSlice";
 import rolesReducer from "./roles/rolesSlice";
 import questionsReducer from "./questions/questionsSlice";
-
+import assessmentReducer from "./assessments/assessmentSlice";
 const rootReducer = combineReducers({
 	user: userReducer,
 	domains: domainsReducer,
 	roles: rolesReducer,
 	questions: questionsReducer,
+	assessment: assessmentReducer,
 });
 
 const persistConfig = {

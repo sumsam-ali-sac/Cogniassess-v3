@@ -15,6 +15,8 @@ var _domainModel = _interopRequireDefault(require("../models/domain.model.js"));
 
 var _mongoose = _interopRequireDefault(require("mongoose"));
 
+var _mistralai = _interopRequireDefault(require("@mistralai/mistralai"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -26,8 +28,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
-function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
 
 var generate = function generate(req, res) {
   var _req$body, selectedDomain, selectedRole, userId, fastApiUrl, userCV, cvContent, response;
@@ -106,7 +106,7 @@ var generate = function generate(req, res) {
 exports.generate = generate;
 
 var evaluate = function evaluate(req, res) {
-  var _req$body2, questions, role, all_questions, fastApiUrl, response;
+  var _req$body2, questions, role, all_questions, apiKey, client, Evalprompt, chatResponse, Evaluation, obj;
 
   return regeneratorRuntime.async(function evaluate$(_context2) {
     while (1) {
@@ -141,18 +141,35 @@ var evaluate = function evaluate(req, res) {
               }, rest);
             });
             var str = JSON.stringify(filteredData);
-            all_questions = (_readOnlyError("all_questions"), all_questions + str);
+            all_questions = all_questions + str;
           });
-          fastApiUrl = "http://localhost:8000/evaluate";
-          _context2.next = 8;
-          return regeneratorRuntime.awrap(_axios["default"].post(fastApiUrl, {
-            UserAnswers: UserAnswers
+          apiKey = process.env.MISTRAL_API_KEY;
+          client = new _mistralai["default"](apiKey);
+          Evalprompt = "\t\n\tCandidate Responses: \n\n\t".concat(all_questions, "\n\t\n\tEvaluate the candidate's responses for a non-technical role based on the selected domains. Assess each answer for relevance, clarity, innovation, and how well they align with the job requirements. If responses appear to be placeholders or are inadequately detailed, this should be reflected in the evaluation. Assign a score out of 100 and provide constructive feedback.\n\n\tTask:\n\n\tPlease ensure fairness in your evaluation Grade based on Alignment with Role Requirements, Innovation and Creativity , Clarity and Articulation , Relevance\n\n\tIf the asnwers are unsatisfactory give straight zero.\n\n\tReturn the results in a JSON object structured as follows:\n\n\t{\n\t\"points\": \"Numerical score\",\n\t\"feedback\": \"Textual feedback summarizing the strengths and weaknesses of the candidate\u2019s answers. If answers are placeholders or inadequate, recommend a resubmission for a \n\t\tmore accurate assessment.\"\n\t}\n\n\tGuidelines:\n\n\tPoints: This key should contain the numerical score reflecting how well the candidate's answers meet the job role and domain expectations.\n\tFeedback: This key should provide feedback detailing strengths and weaknesses in the candidate's answers, including specific recommendations for improvement \n\tor reasons for resubmission.\n\n\tMAKE SURE YOU FOLLOW THE JSON FORMAT GIVEN\n\t");
+          _context2.next = 10;
+          return regeneratorRuntime.awrap(client.chat({
+            model: "mistral-small-latest",
+            response_format: {
+              type: "json_object"
+            },
+            messages: [{
+              role: "user",
+              content: Evalprompt
+            }]
           }));
 
-        case 8:
-          response = _context2.sent;
+        case 10:
+          chatResponse = _context2.sent;
+          Evaluation = chatResponse.choices[0].message.content;
+          obj = JSON.parse(Evaluation);
+          res.json({
+            message: "Answers Evaluated Successfully",
+            points: obj.points,
+            feedback: obj.feedback
+          });
+          return _context2.abrupt("return", obj);
 
-        case 9:
+        case 15:
         case "end":
           return _context2.stop();
       }
