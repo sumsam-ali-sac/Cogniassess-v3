@@ -3,9 +3,11 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.checkIfCvContentExists = void 0;
+exports.analyzeCV = exports.checkIfCvContentExists = void 0;
 
 var _cvModel = _interopRequireDefault(require("../models/cv.model.js"));
+
+var _axios = _interopRequireDefault(require("axios"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -56,3 +58,48 @@ var checkIfCvContentExists = function checkIfCvContentExists(req, res) {
 };
 
 exports.checkIfCvContentExists = checkIfCvContentExists;
+
+var analyzeCV = function analyzeCV(req, res) {
+  var _req$body, extractedText, userId, fastApiUrl, response, data;
+
+  return regeneratorRuntime.async(function analyzeCV$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _req$body = req.body, extractedText = _req$body.extractedText, userId = _req$body.userId;
+          console.log(extractedText, userId);
+          fastApiUrl = "http://localhost:8000/analysis";
+          _context2.next = 6;
+          return regeneratorRuntime.awrap(_axios["default"].post(fastApiUrl, {
+            userId: userId,
+            extractedText: extractedText
+          }));
+
+        case 6:
+          response = _context2.sent;
+          data = response.data;
+          res.json({
+            message: "File analyzed successfully!",
+            analysis: data.analysis,
+            summary: data.summary
+          });
+          return _context2.abrupt("return", data);
+
+        case 12:
+          _context2.prev = 12;
+          _context2.t0 = _context2["catch"](0);
+          res.status(500).json({
+            message: "Server error",
+            error: _context2.t0
+          });
+
+        case 15:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, null, null, [[0, 12]]);
+};
+
+exports.analyzeCV = analyzeCV;

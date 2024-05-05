@@ -109,7 +109,9 @@ var processUpload = function processUpload(req, res) {
             res.json({
               message: "File uploaded and OCR processed successfully",
               extractedText: extractedText,
-              filePath: newFilePath
+              filePath: newFilePath,
+              analysis: data.analysis,
+              summary: data.summary
             });
           });
           _context.next = 37;

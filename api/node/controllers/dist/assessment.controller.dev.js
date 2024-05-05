@@ -27,6 +27,8 @@ function _objectWithoutProperties(source, excluded) { if (source == null) return
 
 function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
+function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
+
 var generate = function generate(req, res) {
   var _req$body, selectedDomain, selectedRole, userId, fastApiUrl, userCV, cvContent, response;
 
@@ -104,7 +106,7 @@ var generate = function generate(req, res) {
 exports.generate = generate;
 
 var evaluate = function evaluate(req, res) {
-  var _req$body2, questions, role, result;
+  var _req$body2, questions, role, all_questions, fastApiUrl, response;
 
   return regeneratorRuntime.async(function evaluate$(_context2) {
     while (1) {
@@ -122,7 +124,7 @@ var evaluate = function evaluate(req, res) {
           }));
 
         case 3:
-          result = {};
+          all_questions = "";
           questions.forEach(function (entry) {
             var progress = entry.progress,
                 status = entry.status,
@@ -139,20 +141,17 @@ var evaluate = function evaluate(req, res) {
               }, rest);
             });
             var str = JSON.stringify(filteredData);
-            console.log(str); // console.log(str);
-            // console.log(result);
-            // const prompt = `
-            // The candidate selected the role ${role} and answered mutiple questions based on multiple sub domains from this role now I want you to grade the candidate out of 100
-            // give me the score only , Base it on the following questions and answers
-            // ${results.questions}
+            all_questions = (_readOnlyError("all_questions"), all_questions + str);
           });
+          fastApiUrl = "http://localhost:8000/evaluate";
+          _context2.next = 8;
+          return regeneratorRuntime.awrap(_axios["default"].post(fastApiUrl, {
+            UserAnswers: UserAnswers
+          }));
 
-        case 5:
+        case 8:
+          response = _context2.sent;
+
+        case 9:
         case "end":
-          return _context2.stop();
-      }
-    }
-  });
-};
-
-exports.evaluate = evaluate;
+ 

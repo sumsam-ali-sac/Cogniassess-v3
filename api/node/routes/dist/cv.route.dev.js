@@ -14,5 +14,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 var cvRouter = _express["default"].Router();
 
 cvRouter.get("/check:userId", _cvController.checkIfCvContentExists);
+cvRouter.post("/analysis", _cvController.analyzeCV);
 var _default = cvRouter;
 exports["default"] = _default;

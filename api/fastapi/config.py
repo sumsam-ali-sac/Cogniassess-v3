@@ -5,34 +5,13 @@ from monsterapi import client as mclient
 load_dotenv()
 
 
-def UserPrompt(self, Role: str, Domain: str) -> str:
-    UserQuery = f"""
-
-        Formulate questions object that are directly relevant to the {Role} and  {Domain}. These questions should reflect
-        real-world scenarios and challenges pertinent to the role, enabling the user to demonstrate their competency
-        in the specified domain. Ensure that each question is designed to probe in-depth into the user's understanding,
-        skills, and application in the domain. Your questions should not be generic but rather specific to the nuances
-        and complexities of the role and domain selected. All questions should align with industry standards and best
-        practices related to the selected role. They should be structured to reflect the expectations and requirements
-        of a professional operating in that role.
-
-        Generate only one Json Object with 2 questions
-
-        Here is an example of how your JSON output might look: {self.OneShotExample}
-        Only Give JSON output as response
-
-        Generate only one Json Object
-
-        """
-    return UserQuery
-
-
 class Settings(BaseSettings):
     mongo_uri: str = os.getenv("MONGO")
     log_level: str = "INFO"
     db_name: str = "cogniassess"
     monster_api: str = os.getenv("MONSTER_API_KEY")
     deployment_id: str = "077095dc-adac-44bd-8326-93670bd41cb0"
+
     OneShotExample: str = """
     {
     "role": "Selected Role",
@@ -67,10 +46,18 @@ class Settings(BaseSettings):
 
     """
 
+    CVcontent: str = ""
+    CVsummary: str = ""
     CandidateContext: str = ""
 
     def setCandidateContext(self, CandidateContext):
         self.CandidateContext = CandidateContext
+
+    def setCVcontent(self, CVcontent):
+        self.CVcontent = CVcontent
+
+    def setCVsummary(self, CVsummary):
+        self.CVsummary = CVsummary
 
     def getClient(self):
         deploy_client = mclient(api_key=self.monster_api)
@@ -88,10 +75,10 @@ class Settings(BaseSettings):
             self.getDeploymentID())
         return status_ret
 
-    def UserPrompt(self, Role: str, Domain: str) -> str:
+    def UserPromptCRoleDomain(self, Role: str, Domain: str) -> str:
         UserQuery = f"""
 
-        Candidate Context: {self.CandidateContext}
+        Candidate Context: {self.CVsummary}
 
         Formulate questions object that are directly relevant to the {Role} and  {Domain} and the candidate. These questions should reflect
         real-world scenarios and challenges pertinent to the role, enabling the user to demonstrate their competency
@@ -111,6 +98,75 @@ class Settings(BaseSettings):
 
         """
         return UserQuery
+
+    def UserPromptLRoleDomain(self, Role: str, Domain: str) -> str:
+
+        UserQuery = f"""
+
+
+        JSON object to fill up:
+        
+        {self.OneShotExample}
+
+        
+        Your operational directives are as follows:
+
+        
+        Selected Role: {Role}
+        Selected Domain: {Domain}
+
+        Candidate Context: {self.CVsummary}
+
+        Formulate questions object that are directly relevant to the {Role} and  {Domain} and the candidate. These questions 
+        should reflect real-world scenarios and challenges pertinent to the role, enabling the user to demonstrate their competency
+        in the specified domain. Ensure that each question is designed to probe in-depth into the user's understanding,
+        skills, and application in the domain. Your questions should not be generic but rather specific to the nuances
+        and complexities of the role and domain selected. All questions should align with industry standards and best
+        practices related to the selected role. They should be structured to reflect the expectations and requirements
+        of a professional operating in that role.
+
+        Your output must be formatted as follows:
+
+        Generate only one Json Object with 2 questions Make sure the JSON object is correct
+
+        The provided JSON object must be structured with various properties and nested elements, detailed as follows:
+
+        1. role: A string value indicating the profession or job title of the individual, in this case, {Role} here.
+
+        2. domain: Another string value, specifying the area of expertise or focus for the individual, which is {Domain} here.
+
+        3. questions: An array of objects, each representing a question related to the domain of the individual's role. Each question object includes:
+            - id: A string that uniquely identifies the question. This could be used for referencing the question in discussions or analyses.
+            - text: The actual text of the question being posed.
+
+        Here is how your JSON output must look: 
+        
+        {self.OneShotExample}
+        
+        Only Give JSON output as response do not write anything else just the JSON object
+        """
+        return UserQuery
+
+    def UserPromptSummarizeCV(self):
+        summary_prompt = f"""
+        Please review the attached CV and provide a concise summary. The summary should capture the candidate's overall professional background, 
+        key skills, and major achievements. Highlight the candidate's educational background, work experience, and any special qualifications 
+        or certifications they possess.
+
+        Here are the CV details: {self.CVcontent}
+        """
+        return summary_prompt
+
+    def UserPromptLCVcontext(self):
+        contextprompt = f"""
+        Please analyze the attached CV to identify the candidate's key strengths and areas of expertise. Provide a response addressing the candidate directly 
+        in a friendlyc converstational way, highlighting these strengths in a supportive and encouraging manner while being strict on weaknesses. 
+        Use specific examples from the CV to illustrate where the candidate has demonstrated exceptional skills or achievements and where the candidate is lacking. 
+        Your feedback should help the candidate understand their strong points and how they can effectively utilize these in their professional advancement.
+
+        Here are the CV details: {self.CVcontent}
+        """
+        return contextprompt
 
     def GetServiceClient(self):
         status_ret = self.getStatus()

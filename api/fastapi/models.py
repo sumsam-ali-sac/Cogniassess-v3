@@ -35,3 +35,7 @@ class GenerationResponse(BaseModel):
 class TextData(BaseModel):
     userId: str
     extractedText: str
+
+
+class QuestionAnswerData(BaseModel):
+    UserAnswers: str

@@ -73,6 +73,8 @@ export const processUpload = async (req, res) => {
 				message: "File uploaded and OCR processed successfully",
 				extractedText,
 				filePath: newFilePath,
+				analysis: data.analysis,
+				summary: data.summary,
 			});
 		});
 	} catch (error) {

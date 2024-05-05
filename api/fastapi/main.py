@@ -10,6 +10,7 @@ from logger import get_logger
 from models import TextData, GenerationRequest, GenerationResponse, Info, Question
 import time
 import os
+import re
 app = FastAPI()
 
 app.add_middleware(
@@ -39,7 +40,7 @@ async def mongodb_connection(app: FastAPI):
         await mongodb_client.close()
 
 app = FastAPI(lifespan=mongodb_connection)
-
+model = "llama2-7b-chat"
 CandidateContext = ""
 
 # API endpoints
@@ -59,66 +60,155 @@ def read_item(item_id: int, q: Optional[str] = None):
 async def process_text(data: TextData):
     logger.info(f"Received user ID: {data.userId}")
     logger.info(f"Received text: {data.extractedText}")
-    return {"message": "Text processed successfully", "userId": data.userId}
+    key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
+    if settings.CandidateContext == "":
+        context_client = mclient(
+            api_key=key)
+        settings.setCVcontent(data.extractedText)
+        context_prompt = "<|User|>" + settings.UserPromptLCVcontext() + "<s>"
+        summary_prompt = "<|User|>" + settings.UserPromptSummarizeCV() + "<s>"
+
+        ContextData = {
+            "prompt": context_prompt,
+            "max_length": "1024",
+            "temprature": 0.8,
+        }
+
+        SummaryData = {
+            "prompt": summary_prompt,
+            "max_length": "512",
+            "temprature": 0.8,
+        }
+
+        CandidateContext = context_client.generate(model, ContextData)
+        CVsummary = context_client.generate(model, SummaryData)
+
+        settings.setCandidateContext(CandidateContext['text'])
+        settings.setCVsummary(CVsummary['text'])
+        # print(CandidateContext['text'])
+        # print("----------------------------------------------------------------")
+        # print(CVsummary['text'])
+
+    return {"summary": CVsummary['text'], "analysis": CandidateContext['text'], "userId": data.userId}
+
+
+@app.post("/analysis")
+async def analyze_cv(data: TextData):
+    logger.info(f"Received user ID: {data.userId}")
+    logger.info(f"Received text: {data.extractedText}")
+    key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
+    if settings.CandidateContext == "":
+        context_client = mclient(
+            api_key=key)
+        settings.setCVcontent(data.extractedText)
+        context_prompt = "<|User|>" + settings.UserPromptLCVcontext() + "<s>"
+        summary_prompt = "<|User|>" + settings.UserPromptSummarizeCV() + "<s>"
+
+        ContextData = {
+            "prompt": context_prompt,
+            "max_length": "1024",
+            "temprature": 0.8,
+        }
+
+        SummaryData = {
+            "prompt": summary_prompt,
+            "max_length": "512",
+            "temprature": 0.8,
+        }
+
+        CandidateContext = context_client.generate(model, ContextData)
+        CVsummary = context_client.generate(model, SummaryData)
+
+        settings.setCandidateContext(CandidateContext['text'])
+        settings.setCVsummary(CVsummary['text'])
+        # print(CandidateContext['text'])
+        # print("----------------------------------------------------------------")
+        # print(CVsummary['text'])
+
+    return {"summary": CVsummary['text'], "analysis": CandidateContext['text'], "userId": data.userId}
+
+
+def parse_dict(text):
+    dict_obj = {}
+    pair_pattern = r'"\s*([^"]+)\s*"\s*:\s*(?:"([^"]*)"|(\{.*?\})|(\[.*?\]))'
+    pairs = re.findall(pair_pattern, text, re.DOTALL)
+    for key, str_value, dict_value, list_value in pairs:
+        if str_value:
+            dict_obj[key] = str_value
+        elif dict_value:
+            dict_obj[key] = parse_dict(dict_value)
+        elif list_value:
+            dict_obj[key] = parse_list(list_value)
+    return dict_obj
+
+
+def parse_list(text):
+    list_obj = []
+    items = re.findall(r'\{.*?\}', text, re.DOTALL)
+    for item in items:
+        list_obj.append(parse_dict(item))
+    return list_obj
 
 
 @app.post("/generate-questions/")
 async def generate_questions(request: GenerationRequest):
 
-    # summary_client = mclient(api_key=os.getenv("MONSTER_API_KEY"))
-    # deploy_client = mclient(api_key=os.getenv("MONSTER_API_KEY"))
+    key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
+    if settings.CVsummary == "":
+        context_client = mclient(
+            api_key=key)
 
-    # if settings.CandidateContext == "":
-    #     summary_client = settings.getClient()
-    #     model = "mpt-7b-instruct"
+        settings.setCVcontent(request.cvContent)
+        summary_prompt = "<|User|>" + settings.UserPromptSummarizeCV() + "<s>"
 
-    #     SummaryData = {
-    #         "prompt": f"""
-    #         Analyze the CV provided and summarize it in short, the summary should capture the essence of the candidate's professional
-    #         profile and qualifications while keeping the summary short.
+        SummaryData = {
+            "prompt": summary_prompt,
+            "max_length": "512",
+            "temprature": 0.8,
+        }
+        CVsummary = context_client.generate(model, SummaryData)
 
-    #         Please summarize the following CV:
-    #         {request.cvContent}
-    #         """,
-    #         "max_length": 256
-    #     }
-
-    #     CandidateContext = summary_client.generate(model, SummaryData)
-    #     settings.setCandidateContext(CandidateContext)
-    #     print(CandidateContext)
+        settings.setCVsummary(CVsummary['text'])
 
     questions_list = []
 
-    payload = {
-        "input_variables": {"system": str("Intelligent Assessment Generator"),
-                            "prompt": str(settings.UserPrompt(Role=request.selectedRole, Domain=request.selectedDomain))},
-        "temperature": 0.6,
-        "max_tokens": 200,
-    }
+    # payload = {
+    #     "input_variables": {"system": str("Intelligent Assessment Generator"),
+    #                         "prompt": str(settings.UserPrompt(Role=request.selectedRole, Domain=request.selectedDomain))},
+    #     "temperature": 0.6,
+    #     "max_tokens": 200,
+    # }
 
     # service_client = settings.GetServiceClient()
     # output = service_client.generate(model="deploy-llm", data=payload)
-
     # res = json.loads(output)['text'][0].split('\n\n')[0]
-    res = """
-    {
-        "role": "Human Resource Manager",
-        "domain": "Diversity and Inclusion",
-        "questions": [
-            {
-                "id": "Q1",
-                "text": "How do you ensure that the recruitment process is inclusive and diverse?"
-            },
-            {
-                "id": "Q2",
-                "text": "Can you discuss your experience with training and development programs for diverse employees?"
-            }
-        ]
-    }
-    """
 
-    obj = json.loads(res)
-    obj["domain"] = request.selectedDomain
+    questions_client = mclient(api_key=key)
+    questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
+                                                               ), "max_length": "256", "temprature": 0.8}
+    response = questions_client.generate(model, questions_data)
+
+    # res = """
+    # {
+    #     "role": "Human Resource Manager",
+    #     "domain": "Diversity and Inclusion",
+    #     "questions": [
+    #         {
+    #             "id": "Q1",
+    #             "text": "How do you ensure that the recruitment process is inclusive and diverse?"
+    #         },
+    #         {
+    #             "id": "Q2",
+    #             "text": "Can you discuss your experience with training and development programs for diverse employees?"
+    #         }
+    #     ]
+    # }
+    # """
+    print(response)
+    # res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
+    # res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")
+    # obj = json.loads(res)
+    # obj["domain"] = request.selectedDomain
+    obj = parse_dict(response['text'])
     questions_list.append(obj)
-    time.sleep(2)
     return GenerationResponse(questions=[Info(**question) for question in questions_list])

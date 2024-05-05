@@ -52,7 +52,7 @@ export const evaluate = async (req, res) => {
 			.status(400)
 			.json({ error: "No questions provided for evaluation." });
 	}
-	const result = {};
+	const all_questions = "";
 	questions.forEach((entry) => {
 		const { progress, status, ...filteredData } = entry;
 		filteredData.questions = filteredData.questions.map(
@@ -62,15 +62,10 @@ export const evaluate = async (req, res) => {
 			})
 		);
 		const str = JSON.stringify(filteredData);
-
-		console.log(str);
-
-		// console.log(str);
-
-		// console.log(result);
-		// const prompt = `
-		// The candidate selected the role ${role} and answered mutiple questions based on multiple sub domains from this role now I want you to grade the candidate out of 100
-		// give me the score only , Base it on the following questions and answers
-		// ${results.questions}
+		all_questions = all_questions + str;
+	});
+	const fastApiUrl = "http://localhost:8000/evaluate";
+	const response = await axios.post(fastApiUrl, {
+		UserAnswers,
 	});
 };
