@@ -13,6 +13,8 @@ export default function Points() {
 	const role = useSelector((state) => state.roles.selectedRole);
 	const points = useSelector((state) => state.assessment.points);
 	const feedback = useSelector((state) => state.assessment.feedback);
+	const user = useSelector((state) => state.user.user);
+
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
@@ -27,7 +29,7 @@ export default function Points() {
 				try {
 					const response = await axios.post(
 						"api/node/assessment/evaluate",
-						{ questions, role }
+						{ questions, role, user }
 					);
 					dispatch(setPoints(response.data.points));
 					dispatch(setFeedback(response.data.feedback));

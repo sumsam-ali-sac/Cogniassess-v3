@@ -220,17 +220,30 @@ async def generate_questions(request: GenerationRequest):
     # service_client = settings.GetServiceClient()
     # output = service_client.generate(model="deploy-llm", data=payload)
     # res = json.loads(output)['text'][0].split('\n\n')[0]
+    print()
+    print()
+    print()
+    print()
+    print()
+
+    print(request.selectedRole, request.selectedDomain)
+    print()
+    print()
+    print()
+    print()
+    print()
 
     questions_client = mclient(api_key=key)
     questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
-                                                               ), "max_length": "256", "temprature": 0.8}
+                                                               ), "max_length": "312", "temprature": 0.8}
     response = questions_client.generate(model, questions_data)
 
-    print(response)
+    # print(response)
     # res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
     # res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")
     # obj = json.loads(res)
     # obj["domain"] = request.selectedDomain
     obj = parse_dict(response['text'])
+
     questions_list.append(obj)
     return GenerationResponse(questions=[Info(**question) for question in questions_list])

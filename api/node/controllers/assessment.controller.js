@@ -1,6 +1,6 @@
 import axios from "axios";
 import CV from "../models/cv.model.js";
-import Role from "../models/role.model.js";
+import Ranking from "../models/ranking.model.js";
 import Domain from "../models/domain.model.js";
 import mongoose from "mongoose";
 import MistralClient from "@mistralai/mistralai";
@@ -47,7 +47,7 @@ export const generate = async (req, res) => {
 };
 
 export const evaluate = async (req, res) => {
-	const { questions, role } = req.body;
+	const { questions, role, user } = req.body;
 	if (!questions || questions.length === 0) {
 		return res
 			.status(400)
@@ -107,6 +107,14 @@ export const evaluate = async (req, res) => {
 	const Evaluation = chatResponse.choices[0].message.content;
 
 	let obj = JSON.parse(Evaluation);
+
+	const existingRanking = await Ranking.findOne({ userID: user.id });
+	if (existingRanking) {
+		const newScore = (existingRanking.rankScore + obj.points) / 2;
+		await Ranking.updateOne({ userID: user.id }, { rankScore: newScore });
+	} else {
+		await new Ranking({ userID: user.id, rankScore: obj.points }).save();
+	}
 
 	res.json({
 		message: "Answers Evaluated Successfully",

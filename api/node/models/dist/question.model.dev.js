@@ -10,20 +10,29 @@ var _mongoose = _interopRequireDefault(require("mongoose"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var Schema = _mongoose["default"].Schema;
-var rankingSchema = new Schema({
-  userID: {
+var questionSchema = new Schema({
+  content: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    required: true,
+    maxlength: 50
+  },
+  domain: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "User"
+    ref: "Domain"
   },
-  rankScore: {
-    type: Number,
+  targetedRole: {
+    type: Schema.Types.ObjectId,
     required: true,
-    "default": 0
+    ref: "Role"
   }
 });
 
-var Ranking = _mongoose["default"].model("Ranking", rankingSchema);
+var Question = _mongoose["default"].model("Question", questionSchema);
 
-var _default = Ranking;
+var _default = Question;
 exports["default"] = _default;

@@ -9,7 +9,7 @@ var _axios = _interopRequireDefault(require("axios"));
 
 var _cvModel = _interopRequireDefault(require("../models/cv.model.js"));
 
-var _roleModel = _interopRequireDefault(require("../models/role.model.js"));
+var _rankingModel = _interopRequireDefault(require("../models/ranking.model.js"));
 
 var _domainModel = _interopRequireDefault(require("../models/domain.model.js"));
 
@@ -106,13 +106,13 @@ var generate = function generate(req, res) {
 exports.generate = generate;
 
 var evaluate = function evaluate(req, res) {
-  var _req$body2, questions, role, all_questions, apiKey, client, Evalprompt, chatResponse, Evaluation, obj;
+  var _req$body2, questions, role, user, all_questions, apiKey, client, Evalprompt, chatResponse, Evaluation, obj, existingRanking, newScore;
 
   return regeneratorRuntime.async(function evaluate$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          _req$body2 = req.body, questions = _req$body2.questions, role = _req$body2.role;
+          _req$body2 = req.body, questions = _req$body2.questions, role = _req$body2.role, user = _req$body2.user;
 
           if (!(!questions || questions.length === 0)) {
             _context2.next = 3;
@@ -162,6 +162,39 @@ var evaluate = function evaluate(req, res) {
           chatResponse = _context2.sent;
           Evaluation = chatResponse.choices[0].message.content;
           obj = JSON.parse(Evaluation);
+          _context2.next = 15;
+          return regeneratorRuntime.awrap(_rankingModel["default"].findOne({
+            userID: user.id
+          }));
+
+        case 15:
+          existingRanking = _context2.sent;
+
+          if (!existingRanking) {
+            _context2.next = 22;
+            break;
+          }
+
+          newScore = (existingRanking.rankScore + obj.points) / 2;
+          _context2.next = 20;
+          return regeneratorRuntime.awrap(_rankingModel["default"].updateOne({
+            userID: user.id
+          }, {
+            rankScore: newScore
+          }));
+
+        case 20:
+          _context2.next = 24;
+          break;
+
+        case 22:
+          _context2.next = 24;
+          return regeneratorRuntime.awrap(new _rankingModel["default"]({
+            userID: user.id,
+            rankScore: obj.points
+          }).save());
+
+        case 24:
           res.json({
             message: "Answers Evaluated Successfully",
             points: obj.points,
@@ -169,7 +202,7 @@ var evaluate = function evaluate(req, res) {
           });
           return _context2.abrupt("return", obj);
 
-        case 15:
+        case 26:
         case "end":
           return _context2.stop();
       }

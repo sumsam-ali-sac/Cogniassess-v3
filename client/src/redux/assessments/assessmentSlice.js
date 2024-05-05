@@ -3,8 +3,8 @@ import { createSlice } from "@reduxjs/toolkit";
 export const assessmentSlice = createSlice({
 	name: "assessment",
 	initialState: {
-		points: 0,
-		feedback: "",
+		points: null,
+		feedback: null,
 	},
 	reducers: {
 		setPoints: (state, action) => {

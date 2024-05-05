@@ -112,8 +112,7 @@ class Settings(BaseSettings):
         Your operational directives are as follows:
 
         
-        Selected Role: {Role}
-        Selected Domain: {Domain}
+        The candidate has Selected Role: {Role} and has Selected Domain: {Domain}
 
         Candidate Context: {self.CVsummary}
 
@@ -152,8 +151,15 @@ class Settings(BaseSettings):
         Please review the attached CV and provide a concise summary. The summary should capture the candidate's overall professional background, 
         key skills, and major achievements. Highlight the candidate's educational background, work experience, and any special qualifications 
         or certifications they possess.
+        
+        Please keep the summary short in paragraph format
 
         Here are the CV details: {self.CVcontent}
+        
+        
+        Please keep the summary short in paragraph format
+
+        
         """
         return summary_prompt
 
