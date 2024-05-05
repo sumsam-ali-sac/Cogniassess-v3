@@ -154,4 +154,10 @@ var evaluate = function evaluate(req, res) {
 
         case 9:
         case "end":
- 
+          return _context2.stop();
+      }
+    }
+  });
+};
+
+exports.evaluate = evaluate;
