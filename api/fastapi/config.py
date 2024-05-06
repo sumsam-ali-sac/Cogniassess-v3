@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 import os
 from dotenv import load_dotenv
 from monsterapi import client as mclient
+from models import TextData, GenerationRequest, GenerationResponse, Info, Question, QuestionAnswerData
+import json
 load_dotenv()
 
 
@@ -145,6 +147,40 @@ class Settings(BaseSettings):
         Only Give JSON output as response do not write anything else just the JSON object
         """
         return UserQuery
+
+    def SystemPromptQuestionGenerator(self):
+
+        system = f"""
+        
+        A Candidate has provided his context along with the Role he want to work for and the domain of the role he wants you to text
+        
+        
+        You are an intelligent assessment generator that can generate assessment that is directly relevant to the Candidate's selected role 
+        and  selected domain and the candidate. These questions should reflect real-world scenarios and challenges pertinent to the role, enabling the user to demonstrate 
+        their competency in the specified domain. Ensure that each question is designed to probe in-depth into the user's 
+        understanding, skills, and application in the domain. Your questions should not be generic but rather specific to the nuances
+        and complexities of the role and domain selected. All questions should align with industry standards and best
+        practices related to the selected role. 
+        
+        
+        You will be provided with the selected role , selected domain and candidate's context and your will generate two questions based on the following schema
+
+        The JSON object must use the schema: {self.OneShotExample}   
+        
+        """
+        return system
+
+    def UserPromptGRoleDomain(self, Role: str, Domain: str) -> str:
+        userPrompt = f"""
+        The candidate has Selected Role: {Role} and has Selected Domain: {Domain}
+
+        Candidate Context: {self.CVsummary}
+        
+        Generate two questions based on the following schema
+        
+        """
+
+        return userPrompt
 
     def UserPromptSummarizeCV(self):
         summary_prompt = f"""

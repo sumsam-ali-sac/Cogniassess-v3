@@ -8,6 +8,7 @@ import json
 from config import settings
 from logger import get_logger
 from models import TextData, GenerationRequest, GenerationResponse, Info, Question, QuestionAnswerData
+from groq import Groq
 import time
 import os
 import re
@@ -191,10 +192,11 @@ def parse_list(text):
 @app.post("/generate-questions/")
 async def generate_questions(request: GenerationRequest):
 
-    key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
+    # ------ Question Generation -------------------------------- L
+    Monster_key = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkZGRhNjcyYTFmOGY5MDVmYzQxZGIxYmM5ODg4OWRhIiwiY3JlYXRlZF9hdCI6IjIwMjQtMDUtMDFUMTA6MTc6MTYuMzA3ODU0In0.tepuJ2ycdTeh4vxRk2U95crWaBC1s7Fp9MGUOqDyMyw"
     if settings.CVsummary == "":
         context_client = mclient(
-            api_key=key)
+            api_key=Monster_key)
 
         settings.setCVcontent(request.cvContent)
         summary_prompt = "<|User|>" + settings.UserPromptSummarizeCV() + "<s>"
@@ -220,30 +222,48 @@ async def generate_questions(request: GenerationRequest):
     # service_client = settings.GetServiceClient()
     # output = service_client.generate(model="deploy-llm", data=payload)
     # res = json.loads(output)['text'][0].split('\n\n')[0]
-    print()
-    print()
-    print()
+
     print()
     print()
 
     print(request.selectedRole, request.selectedDomain)
     print()
     print()
-    print()
-    print()
-    print()
 
-    questions_client = mclient(api_key=key)
-    questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
-                                                               ), "max_length": "312", "temprature": 0.8}
-    response = questions_client.generate(model, questions_data)
+    # questions_client = mclient(api_key=key)
+    # questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
+    #                                                            ), "max_length": "312", "temprature": 0.8}
+    # response = questions_client.generate(model, questions_data)
 
     # print(response)
     # res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
     # res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")
     # obj = json.loads(res)
     # obj["domain"] = request.selectedDomain
-    obj = parse_dict(response['text'])
+    # obj = parse_dict(response['text'])
 
+    client = Groq(
+        api_key="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",
+    )
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "system",
+                "content": settings.SystemPromptQuestionGenerator()
+            },
+            {
+                "role": "user",
+                "content": settings.UserPromptGRoleDomain(request.selectedRole, request.selectedDomain),
+            },
+        ],
+        model="llama3-8b-8192",
+        temperature=0,
+        stream=False,
+        response_format={"type": "json_object"},
+    )
+
+    obj = json.loads(chat_completion.choices[0].message.content)
+    print(obj)
     questions_list.append(obj)
     return GenerationResponse(questions=[Info(**question) for question in questions_list])

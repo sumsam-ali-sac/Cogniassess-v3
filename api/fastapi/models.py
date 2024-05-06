@@ -25,10 +25,6 @@ class GenerationRequest(BaseModel):
 
 
 class GenerationResponse(BaseModel):
-    questions: Dict[str, str]
-
-
-class GenerationResponse(BaseModel):
     questions: List[Info]
 
 

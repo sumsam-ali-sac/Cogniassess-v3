@@ -1,98 +1,36 @@
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import { createProxyMiddleware } from "http-proxy-middleware";
-import userRouter from "./routes/user.route.js";
-import authRouter from "./routes/auth.route.js";
-import roleRouter from "./routes/role.route.js";
-import ocrRouter from "./routes/ocr.route.js";
-import cvRouter from "./routes/cv.route.js";
-import domainRouter from "./routes/domain.route.js";
-import assessmentRouter from "./routes/assessment.route.js";
-import cors from "cors";
-import helmet from "helmet";
+import { createServer } from "http";
+import { config as dotenvConfig } from "dotenv";
+import { setupMiddlewares } from "./config/middleware.js";
+import { connectDB } from "./lib/connectDB.js";
+import { setupRoutes } from "./config/routes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import { setupWebSocket } from "./lib/websocket.js";
 
-dotenv.config();
+// Configure environment variables
+dotenvConfig();
 
-async function connectDB() {
-	try {
-		await mongoose.connect(process.env.MONGO);
-		console.log("MongoDB connected successfully");
-	} catch (error) {
-		console.error("MongoDB connection error:", error);
-	}
-}
-
+// Initialize database connection
 connectDB();
 
-mongoose.connection.on("connected", () => {
-	console.log("Mongoose connected to DB");
-});
-
-mongoose.connection.on("error", (err) => {
-	console.error("Mongoose connection error:", err);
-});
-
-mongoose.connection.on("disconnected", () => {
-	console.log("Mongoose disconnected from DB");
-});
-
-process.on("SIGINT", () => {
-	mongoose.connection.close(() => {
-		console.log("Mongoose connection disconnected due to app termination");
-		process.exit(0);
-	});
-});
-
+// Create an Express application
 const app = express();
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(express.static("public"));
-app.use(
-	"/api/fastapi",
-	createProxyMiddleware({
-		target: "http://localhost:8000",
-		changeOrigin: true,
-		pathRewrite: {
-			"^/api/fastapi": "",
-		},
-	})
-);
 
-app.use("/api/node/user", userRouter);
-app.use("/api/node/auth", authRouter);
-app.use("/api/node/roles", roleRouter);
-app.use("/api/node/upload", ocrRouter);
-app.use("/api/node/domains", domainRouter);
-app.use("/api/node/cv", cvRouter);
-app.use("/api/node/assessment", assessmentRouter);
+// Setup middleware configurations
+setupMiddlewares(app);
 
-app.use((err, req, res, next) => {
-	const statusCode = err.statusCode || 500;
-	console.log(err);
-	if (err.name === "ValidationError") {
-		const errors = Object.values(err.errors).map((el) => el.message);
-		const fields = Object.values(err.errors).map((el) => el.path);
-		const message = `${errors.join(
-			" and "
-		)} Please ensure unique values for: ${fields.join(", ")}.`;
+// Define application routes
+setupRoutes(app);
 
-		return res.status(400).json({
-			success: false,
-			statusCode: 400,
-			message,
-		});
-	}
+// Use custom error handler
+app.use(errorHandler);
 
-	const message = err.message || "An unexpected error occurred.";
-	return res.status(statusCode).json({
-		success: false,
-		statusCode,
-		message,
-	});
-});
+const server = createServer(app);
 
-app.listen(3000, () => {
-	console.log("listening on 3000 ");
+setupWebSocket(server);
+
+// Define the port for the server to listen on
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+	console.log(`Server is listening on http://localhost:${PORT}`);
 });
