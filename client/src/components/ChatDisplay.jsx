@@ -19,9 +19,9 @@ const Message = memo(({ msg }) => {
 						? "bg-neon-green text-neutral-700 text-right"
 						: "bg-neutral-700 text-white text-left"
 				}`}>
-				<p className="font-worksans md:tracking-wide md:text-lg">
+				<div className="font-worksans md:tracking whitespace-pre-wrap md:text-lg">
 					{msg.text}
-				</p>
+				</div>
 			</div>
 			{msg.sender === "user" && (
 				<img

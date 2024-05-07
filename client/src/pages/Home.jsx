@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 import HeroSection from "../components/HeroSection";
 import RolesSection from "../components/RoleSection";
 import Features from "../components/Features";
-import StreaksSection from "../components/StreaksSection";
+import LeaderboardSection from "../components/LeaderboardSection";
 import UpdateSection from "../components/UpdateSection";
 
 const Home = () => {
@@ -14,7 +14,7 @@ const Home = () => {
 			<HeroSection />
 			<RolesSection />
 			<Features />
-			<StreaksSection />
+			<LeaderboardSection />
 			<UpdateSection />
 			<Footer />
 		</div>

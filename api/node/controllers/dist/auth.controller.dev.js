@@ -103,23 +103,19 @@ var signin = function signin(req, res, next) {
 
         case 8:
           _context2.next = 10;
-          return regeneratorRuntime.awrap(user.updateLoginStreak());
-
-        case 10:
-          _context2.next = 12;
           return regeneratorRuntime.awrap(_argon["default"].verify(user.password, password));
 
-        case 12:
+        case 10:
           validPassword = _context2.sent;
 
           if (validPassword) {
-            _context2.next = 15;
+            _context2.next = 13;
             break;
           }
 
           return _context2.abrupt("return", next((0, _error.errorHandler)(401, "Invalid credentials")));
 
-        case 15:
+        case 13:
           token = _jsonwebtoken["default"].sign({
             userId: user._id,
             userRole: user.userRole
@@ -143,20 +139,20 @@ var signin = function signin(req, res, next) {
               avatar: user.avatar
             }
           });
-          _context2.next = 23;
+          _context2.next = 21;
           break;
 
-        case 20:
-          _context2.prev = 20;
+        case 18:
+          _context2.prev = 18;
           _context2.t0 = _context2["catch"](2);
           next(_context2.t0);
 
-        case 23:
+        case 21:
         case "end":
           return _context2.stop();
       }
     }
-  }, null, null, [[2, 20]]);
+  }, null, null, [[2, 18]]);
 };
 
 exports.signin = signin;
@@ -178,15 +174,11 @@ var google = function google(req, res, next) {
           user = _context3.sent;
 
           if (!user) {
-            _context3.next = 13;
+            _context3.next = 11;
             break;
           }
 
           _user$_doc = user._doc, pass = _user$_doc.password, rest = _objectWithoutProperties(_user$_doc, ["password"]);
-          _context3.next = 8;
-          return regeneratorRuntime.awrap(user.updateLoginStreak());
-
-        case 8:
           token = _jsonwebtoken["default"].sign({
             userId: user._id,
             userRole: user.userRole
@@ -209,15 +201,15 @@ var google = function google(req, res, next) {
               avatar: user.avatar
             }
           });
-          _context3.next = 25;
+          _context3.next = 23;
           break;
 
-        case 13:
+        case 11:
           generatedPassword = "google Auth";
-          _context3.next = 16;
+          _context3.next = 14;
           return regeneratorRuntime.awrap(_argon["default"].hash(generatedPassword));
 
-        case 16:
+        case 14:
           hashedPassword = _context3.sent;
           newUser = new _userModel["default"]({
             username: req.body.name.split(" ").join("").toLowerCase() + Math.random().toString(36).slice(-4),
@@ -225,10 +217,10 @@ var google = function google(req, res, next) {
             password: hashedPassword,
             avatar: req.body.photo
           });
-          _context3.next = 20;
+          _context3.next = 18;
           return regeneratorRuntime.awrap(newUser.save());
 
-        case 20:
+        case 18:
           _token = _jsonwebtoken["default"].sign({
             id: newUser._id
           }, process.env.JWT_SECRET);
@@ -251,21 +243,21 @@ var google = function google(req, res, next) {
             }
           });
 
-        case 25:
-          _context3.next = 30;
+        case 23:
+          _context3.next = 28;
           break;
 
-        case 27:
-          _context3.prev = 27;
+        case 25:
+          _context3.prev = 25;
           _context3.t0 = _context3["catch"](0);
           next(_context3.t0);
 
-        case 30:
+        case 28:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 27]]);
+  }, null, null, [[0, 25]]);
 };
 
 exports.google = google;

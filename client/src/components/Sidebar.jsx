@@ -1,7 +1,17 @@
 import React from "react";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi";
+import { NavLink } from "react-router-dom";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+	const links = [
+		{ name: "Home", path: "/" },
+		{ name: "About", path: "/about" },
+		{ name: "Settings", path: "/settings" },
+		{ name: "Assessment", path: "/assessment" },
+		{ name: "Leaderboard", path: "/leaderboard" },
+		{ name: "Contact Us", path: "/contact-us" },
+	];
+
 	return (
 		<div className="flex h-full">
 			{/* Overlay that appears when the sidebar is open */}
@@ -26,36 +36,25 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 					/>
 				</div>
 
-				<div className="flex flex-col font-worksans md:tracking-wider  justify-between h-full">
-					{/* Main Menu or Navigation */}
-					<div>
-						<h3 className="px-4 py-2 text-sm font-semibold text-gray-400">
-							Previous Chats
-						</h3>
-						<ul className="space-y-2">
-							<li className="px-4 py-2 hover:bg-neutral-700 rounded">
-								Chat with John
+				<div className="flex flex-col font-worksans md:tracking-wider justify-between h-full">
+					<ul className="space-y-4 p-4">
+						{links.map((link) => (
+							<li key={link.name}>
+								<NavLink
+									to={link.path}
+									className={({ isActive }) =>
+										`block p-2 text-lg transition-colors duration-200 ${
+											isActive
+												? "text-neon-green"
+												: "text-gray-300 hover:text-neon-green"
+										}`
+									}
+									onClick={toggleSidebar}>
+									{link.name}
+								</NavLink>
 							</li>
-							<li className="px-4 py-2 hover:bg-neutral-700 rounded">
-								Chat with Clara
-							</li>
-							<li className="px-4 py-2 hover:bg-neutral-700 rounded">
-								Project Discussion
-							</li>
-						</ul>
-					</div>
-
-					{/* Bottom Links */}
-					<div className="mt-auto mb-16 font-worksans md:tracking-wider  ">
-						<ul className="space-y-2">
-							<li className="px-4 py-2 hover:bg-neutral-700 rounded cursor-pointer">
-								Go to Homepage
-							</li>
-							<li className="px-4 py-2 hover:bg-neutral-700 rounded cursor-pointer">
-								Logout
-							</li>
-						</ul>
-					</div>
+						))}
+					</ul>
 				</div>
 			</div>
 

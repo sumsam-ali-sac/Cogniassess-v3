@@ -22,10 +22,11 @@ export default function Points() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		if (points === null || feedback === null) {
-			// Check if points or feedback are not set
+		if (!user) {
+			navigate("/sign-in");
+		} else if (points === null || feedback === null) {
 			const evaluateQuestions = async () => {
-				setIsLoading(true); // Ensure loading state is triggered
+				setIsLoading(true);
 				try {
 					const response = await axios.post(
 						"api/node/assessment/evaluate",
@@ -41,9 +42,9 @@ export default function Points() {
 
 			evaluateQuestions();
 		} else {
-			setIsLoading(false); // Set loading to false if values already exist
+			setIsLoading(false);
 		}
-	}, [dispatch, questions, role, points, feedback]); // Add points and feedback to the dependency array
+	}, [dispatch, questions, role, points, feedback, user, navigate]);
 
 	const toggleFeedback = () => {
 		setShowFeedback(!showFeedback);

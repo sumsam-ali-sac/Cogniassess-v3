@@ -2,12 +2,35 @@ import React, { useState, useRef, useEffect } from "react";
 import ChatButtonsPanel from "./ChatButtonsPanel";
 import ChatDisplay from "./ChatDisplay";
 import ExpandingTextarea from "./ExpandingTextArea";
+import { useSelector, useDispatch } from "react-redux";
 
 const Chat = ({ isSidebarOpen }) => {
 	const [chatActive, setChatActive] = useState(false);
 	const [messages, setMessages] = useState([]);
+	const [userAssessmentContext, setuserAssessmentContext] = useState("");
+
 	const endOfMessagesRef = useRef(null);
 	const socketRef = useRef(null);
+	const questions = useSelector((state) => state.questions);
+	const user = useSelector((state) => state.user.user);
+
+	let all_questions = "";
+	questions.forEach((entry) => {
+		const { progress, status, ...filteredData } = entry;
+		filteredData.questions = filteredData.questions.map(
+			({ id, solved, text: question, ...rest }) => ({
+				question,
+				...rest,
+			})
+		);
+		const str = JSON.stringify(filteredData);
+		all_questions = all_questions + str;
+	});
+
+	if (all_questions !== "") {
+		setuserAssessmentContext(`The user has given the following assessment after selecting the non-technical role and its subdomain 
+		the assessment contains both questions and the respective given answers: ${all_questions}`);
+	}
 
 	useEffect(() => {
 		// Establish WebSocket connection
@@ -26,7 +49,17 @@ const Chat = ({ isSidebarOpen }) => {
 
 	const handleBotResponse = (messageText) => {
 		setChatActive(true);
-		setMessages((prev) => [...prev, { text: messageText, sender: "bot" }]);
+		setMessages((prev) => {
+			const lastMessage = prev[prev.length - 1];
+			if (lastMessage && lastMessage.sender === "bot") {
+				// Append the new text to the existing message
+				return prev.slice(0, -1).concat({
+					...lastMessage,
+					text: `${lastMessage.text}${messageText}`,
+				});
+			}
+			return [...prev, { text: messageText, sender: "bot" }];
+		});
 		scrollToBottom();
 	};
 
@@ -35,8 +68,11 @@ const Chat = ({ isSidebarOpen }) => {
 		setMessages((prev) => [...prev, { text: messageText, sender: "user" }]);
 		scrollToBottom();
 		// Send message to WebSocket server
+		console.log(userAssessmentContext);
 		if (socketRef.current) {
-			socketRef.current.send(messageText);
+			socketRef.current.send(
+				messageText + " CONTEXT " + userAssessmentContext
+			);
 		}
 	};
 
@@ -51,7 +87,10 @@ const Chat = ({ isSidebarOpen }) => {
 			}`}>
 			{!chatActive ? (
 				<>
-					<ChatButtonsPanel onButtonClick={handleBotResponse} />
+					<ChatButtonsPanel
+						user={user}
+						onButtonClick={handleUserMessage}
+					/>
 					<ExpandingTextarea onSend={handleUserMessage} />
 				</>
 			) : (

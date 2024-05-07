@@ -44,35 +44,10 @@ const userSchema = new Schema(
 			default:
 				"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
 		},
-		streak: {
-			type: Number,
-			default: 0,
-		},
 	},
 
 	{ timestamps: true }
 );
-
-userSchema.methods.updateLoginStreak = function () {
-	const today = new Date();
-	const yesterday = new Date(today);
-
-	yesterday.setDate(yesterday.getDate() - 1);
-
-	today.setHours(0, 0, 0, 0);
-	yesterday.setHours(0, 0, 0, 0);
-	const lastLoginDate = new Date(this.lastLoginDate);
-	lastLoginDate.setHours(0, 0, 0, 0);
-
-	if (lastLoginDate.getTime() === yesterday.getTime()) {
-		this.streak += 1;
-	} else if (lastLoginDate.getTime() < yesterday.getTime()) {
-		this.streak = 1; // Reset streak if there is a gap
-	}
-
-	this.lastLoginDate = today;
-	return this.save();
-};
 
 userSchema.plugin(uniqueValidator, { message: "{PATH} must be unique." });
 

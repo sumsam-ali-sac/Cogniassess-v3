@@ -2,11 +2,11 @@ import React from "react";
 import { FaCommentAlt, FaQuestionCircle, FaBolt } from "react-icons/fa";
 import ChatButton from "./Chatbutton";
 
-const ChatButtonsPanel = ({ onButtonClick }) => {
+const ChatButtonsPanel = ({ user, onButtonClick }) => {
 	return (
 		<div className="flex flex-col items-center justify-center flex-grow">
 			<h1 className="text-4xl font-rubic font-black mb-10 text-neon-green animate-pulse bg-gradient-to-r from-neon-green from-10%  via-amber-500 via-30% to-neon-green to-90%  inline-block text-transparent bg-clip-text">
-				Hello, coding
+				Hello, {user.username}
 			</h1>
 			<p className="text-2xl font-worksans md:tracking-wide md:text-xl mb-5">
 				Want some feedback?

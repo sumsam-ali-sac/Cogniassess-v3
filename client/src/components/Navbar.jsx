@@ -40,9 +40,9 @@ function Navbar() {
 						isOpen ? "flex" : "hidden"
 					} lg:flex flex-col lg:flex-row items-center font-worksans tracking-wider text-base absolute lg:relative top-full left-0 right-0 lg:right-auto w-full lg:w-auto bg-dark-gray lg:bg-transparent transition-all duration-1000 ease-in-out`}>
 					<Link
-						to="/"
+						to="/leaderboard"
 						className="text-white mr-3 py-3 px-4 hover:text-neon-green transition-colors">
-						Assessment
+						Leaderboard
 					</Link>
 					<Link
 						to="/about"

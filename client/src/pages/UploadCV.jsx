@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -25,22 +26,28 @@ function UploadCV() {
 	const [cvSummary, setcvSummary] = useState("");
 	const [cvAnalysis, setcvAnalysis] = useState("");
 
-	useEffect(() => {
-		const fetchExistingCV = async () => {
-			if (user && user.id) {
-				try {
-					const response = await axios.get(
-						`/api/node/cv/check${user.id}`
-					);
-					setExistingCV(response.data.cvContent);
-				} catch (error) {
-					console.log("Error fetching existing CV:", error);
-				}
-			}
-		};
+	const navigate = useNavigate();
 
-		fetchExistingCV();
-	}, [user.id]);
+	useEffect(() => {
+		if (!user) {
+			navigate("/sign-in");
+		} else {
+			const fetchExistingCV = async () => {
+				if (user && user.id) {
+					try {
+						const response = await axios.get(
+							`/api/node/cv/check${user.id}`
+						);
+						setExistingCV(response.data.cvContent);
+					} catch (error) {
+						console.log("Error fetching existing CV:", error);
+					}
+				}
+			};
+
+			fetchExistingCV();
+		}
+	}, [user, navigate]);
 
 	const handleFileChange = (event) => {
 		const selectedFile = event.target.files[0];

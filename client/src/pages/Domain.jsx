@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Removed Link, added useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { FaRocket } from "react-icons/fa";
 import DomainCard from "../components/DomainCard";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { setSelectedDomains } from "../redux/domains/domainsSlice";
 import { setSelectedRole } from "../redux/roles/rolesSlice";
+
 function Domain() {
 	const [domains, setDomains] = useState([]);
 	const [selectedDomains, setSelectedDomainsState] = useState({});
+
 	const { roleName } = useParams();
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+
+	const user = useSelector((state) => state.user.user);
+	useEffect(() => {
+		if (!user) {
+			navigate("/sign-in");
+		}
+	}, [user, navigate]);
 
 	useEffect(() => {
 		const fetchDomains = async () => {

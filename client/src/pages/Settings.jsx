@@ -1,14 +1,21 @@
 import React, { useState } from "react";
-import { FaBell, FaCreditCard, FaUsers, FaPuzzlePiece } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
+import Sidebar from "../components/Sidebar";
 function SettingsPage() {
-	// State for form fields
+	const [isSidebarOpen, setSidebarOpen] = useState(false);
+	const user = useSelector((state) => state.user.user);
+	const navigate = useNavigate();
+	useEffect(() => {
+		if (!user) {
+			navigate("/sign-in");
+		}
+	}, [user, navigate]);
 	const [userDetails, setUserDetails] = useState({
-		firstName: "Jane",
-		lastName: "Smith",
-		email: "jane@example.com",
-		username: "janesmith",
-		avatar: "/path-to-avatar.jpg",
+		email: user.email,
+		username: user.username,
+		avatar: user.avatar,
 		currentPassword: "",
 		newPassword: "",
 		confirmNewPassword: "",
@@ -28,27 +35,10 @@ function SettingsPage() {
 
 	return (
 		<div className="flex flex-col md:flex-row bg-dark-gray text-white">
-			{/* Sidebar for navigation tabs */}
-			<aside className="font-worksans tracking-wider w-full md:w-1/5 bg-neutral-800 text-white p-5 space-y-6">
-				<div className=" text-lg font-semibold">Account</div>
-				<div className="flex items-center space-x-2 text-white cursor-pointer hover:text-neon-green">
-					<FaBell />
-					<span>Notifications</span>
-				</div>
-				<div className="flex items-center space-x-2 text-white cursor-pointer hover:text-neon-green">
-					<FaCreditCard />
-					<span>Billing</span>
-				</div>
-				<div className="flex items-center space-x-2 text-white cursor-pointer hover:text-neon-green">
-					<FaUsers />
-					<span>Teams</span>
-				</div>
-				<div className="flex items-center space-x-2 text-white cursor-pointer hover:text-neon-green">
-					<FaPuzzlePiece />
-					<span>Integrations</span>
-				</div>
-			</aside>
-
+			<Sidebar
+				isOpen={isSidebarOpen}
+				toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
+			/>
 			<main className="flex-1 p-4 md:p-8">
 				<div className="max-w-4xl mx-auto">
 					{/* Personal Information Section */}
@@ -78,24 +68,6 @@ function SettingsPage() {
 
 							{/* Form Fields */}
 							<div className=" font-worksans tracking-wider text-l flex-1  rounded-lg">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-									<input
-										type="text"
-										name="firstName"
-										value={userDetails.firstName}
-										onChange={handleInputChange}
-										placeholder="First name"
-										className="bg-neutral-700 text-neutral-300 p-3 rounded w-full"
-									/>
-									<input
-										type="text"
-										name="lastName"
-										value={userDetails.lastName}
-										onChange={handleInputChange}
-										placeholder="Last name"
-										className="bg-neutral-700 text-neutral-300 p-3 rounded w-full"
-									/>
-								</div>
 								<input
 									type="email"
 									name="email"
@@ -159,30 +131,6 @@ function SettingsPage() {
 							type="submit"
 							className="font-worksans tracking-wider text-l bg-neon-green text-black px-6 py-2 transition-colors border-2 border-neon-green rounded hover:bg-dark-gray hover:text-neon-green  mt-6">
 							Save
-						</button>
-					</div>
-
-					{/* Log Out Other Sessions Section */}
-					<div className="bg-neutral-800 p-4 md:p-6 mb-8  rounded-lg">
-						<h2 className="text-neon-green font-rubic font-black text-2xl mb-5">
-							Log Out Other Sessions
-						</h2>
-						<p className="text-gray-400 font-worksans tracking-wider text-l mb-6">
-							Please enter your password to confirm you would like
-							to log out of all other sessions.
-						</p>
-						<input
-							type="password"
-							name="confirmLogoutPassword"
-							value={userDetails.confirmLogoutPassword}
-							onChange={handleInputChange}
-							placeholder="Your password"
-							className="bg-neutral-700 text-neutral-300 p-3 rounded w-full"
-						/>
-						<button
-							type="submit"
-							className="font-worksans tracking-wider text-l bg-neon-green text-black px-6 py-2 transition-colors border-2 border-neon-green rounded hover:bg-dark-gray hover:text-neon-green  mt-6">
-							Log out other sessions
 						</button>
 					</div>
 
