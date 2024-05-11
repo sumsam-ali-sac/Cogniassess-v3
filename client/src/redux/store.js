@@ -15,19 +15,21 @@ import domainsReducer from "./domains/domainsSlice";
 import rolesReducer from "./roles/rolesSlice";
 import questionsReducer from "./questions/questionsSlice";
 import assessmentReducer from "./assessments/assessmentSlice";
+import timerReducer from "./timer/timerSlice";
 const rootReducer = combineReducers({
 	user: userReducer,
 	domains: domainsReducer,
 	roles: rolesReducer,
 	questions: questionsReducer,
 	assessment: assessmentReducer,
+	timer: timerReducer,
 });
 
 const persistConfig = {
 	key: "root",
 	storage,
 	version: 1,
-	whitelist: ["user", "roles", "domains"],
+	whitelist: ["user", "roles", "domains", "assessments", "timer"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

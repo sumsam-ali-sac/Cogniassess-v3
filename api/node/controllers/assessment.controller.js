@@ -66,7 +66,7 @@ export const evaluate = async (req, res) => {
 		all_questions = all_questions + str;
 	});
 
-	const apiKey = process.env.MISTRAL_API_KEY;
+	const apiKey = "r7IgDHhcj8STs2uRjx3E5nXBOid89wDK";
 	const client = new MistralClient(apiKey);
 	const Evalprompt = `	
 	Candidate Responses: 

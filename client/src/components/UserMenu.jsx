@@ -39,7 +39,7 @@ function UserMenu({ user }) {
 				onClick={toggleDropdown}
 				className="flex items-center bg-transparent border-none">
 				<img
-					src={user.photo}
+					src={user.avatar}
 					alt="User"
 					className="h-10 w-10 rounded-full mr-2"
 				/>
@@ -49,7 +49,7 @@ function UserMenu({ user }) {
 					isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
 				}`}>
 				<Link
-					to="/profile-settings"
+					to="/settings"
 					className="block px-4 py-2 text-white font-worksans tracking-wider text-base hover:bg-neutral-800 hover:text-neon-green  w-full text-left">
 					<FaCog className="inline mr-2" />
 					<span>Settings</span>

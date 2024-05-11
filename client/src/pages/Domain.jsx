@@ -12,6 +12,7 @@ import { setSelectedRole } from "../redux/roles/rolesSlice";
 function Domain() {
 	const [domains, setDomains] = useState([]);
 	const [selectedDomains, setSelectedDomainsState] = useState({});
+	const [searchTerm, setSearchTerm] = useState("");
 
 	const { roleName } = useParams();
 	const navigate = useNavigate();
@@ -23,6 +24,10 @@ function Domain() {
 			navigate("/sign-in");
 		}
 	}, [user, navigate]);
+
+	const searchDomains = (event) => {
+		setSearchTerm(event.target.value);
+	};
 
 	useEffect(() => {
 		const fetchDomains = async () => {
@@ -66,10 +71,11 @@ function Domain() {
 		});
 	};
 
-	const searchDomains = (event) => {};
+	const filteredDomains = domains.filter((domain) =>
+		domain.DomainName.toLowerCase().includes(searchTerm.toLowerCase())
+	);
 
 	const handleStartClick = () => {
-		// Dispatch action to save selected domains as an object with ids as keys
 		dispatch(setSelectedDomains(selectedDomains));
 		navigate("/upload-cv");
 	};
@@ -108,7 +114,7 @@ function Domain() {
 					<div className="border-b border-2 border-neutral-600 ml-40 mr-40"></div>
 
 					<div className="flex flex-wrap justify-center p-5">
-						{domains.map((domain, index) => (
+						{filteredDomains.map((domain, index) => (
 							<DomainCard
 								key={index}
 								title={domain.DomainName}

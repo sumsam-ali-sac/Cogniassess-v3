@@ -3,10 +3,12 @@ import ChatButtonsPanel from "./ChatButtonsPanel";
 import ChatDisplay from "./ChatDisplay";
 import ExpandingTextarea from "./ExpandingTextArea";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Chat = ({ isSidebarOpen }) => {
 	const [chatActive, setChatActive] = useState(false);
 	const [messages, setMessages] = useState([]);
+	const [userResponses, setuserResponses] = useState("");
 	const [userAssessmentContext, setuserAssessmentContext] = useState("");
 
 	const endOfMessagesRef = useRef(null);
@@ -14,23 +16,35 @@ const Chat = ({ isSidebarOpen }) => {
 	const questions = useSelector((state) => state.questions);
 	const user = useSelector((state) => state.user.user);
 
-	let all_questions = "";
-	questions.forEach((entry) => {
-		const { progress, status, ...filteredData } = entry;
-		filteredData.questions = filteredData.questions.map(
-			({ id, solved, text: question, ...rest }) => ({
-				question,
-				...rest,
-			})
-		);
-		const str = JSON.stringify(filteredData);
-		all_questions = all_questions + str;
-	});
+	const navigate = useNavigate();
 
-	if (all_questions !== "") {
-		setuserAssessmentContext(`The user has given the following assessment after selecting the non-technical role and its subdomain 
-		the assessment contains both questions and the respective given answers: ${all_questions}`);
-	}
+	useEffect(() => {
+		if (!user) {
+			navigate("/sign-in");
+		} else {
+			let all_questions = "";
+			questions.forEach((entry) => {
+				const { progress, status, ...filteredData } = entry;
+				filteredData.questions = filteredData.questions.map(
+					({ id, solved, text: question, ...rest }) => ({
+						question,
+						...rest,
+					})
+				);
+				const str = JSON.stringify(filteredData);
+				all_questions = all_questions + str;
+			});
+
+			if (all_questions !== "") {
+				setuserAssessmentContext(`The user has given the following assessment after selecting the non-technical role and its subdomain 
+				the assessment contains both questions and the respective given answers: ${all_questions}`);
+			}
+
+			setuserResponses(all_questions);
+		}
+	}, [user, navigate, questions]);
+
+	console.log(questions);
 
 	useEffect(() => {
 		// Establish WebSocket connection
@@ -97,6 +111,7 @@ const Chat = ({ isSidebarOpen }) => {
 				<>
 					<ChatDisplay
 						messages={messages}
+						user={user}
 						endRef={endOfMessagesRef}
 					/>
 					<ExpandingTextarea onSend={handleUserMessage} />

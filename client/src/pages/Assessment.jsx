@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Spinner from "../components/Spinner";
 import { addQuestions } from "../redux/questions/questionsSlice";
+
 import axios from "axios";
 
 export default function Assessment() {

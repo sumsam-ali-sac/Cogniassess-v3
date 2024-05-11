@@ -21,11 +21,40 @@ class Settings(BaseSettings):
     "questions": [
         {
         "id": "Q1",
-        "text": "Text of Question 1",
+        "text": "Text of Question 1"
         },
         {
         "id": "Q2",
-        "text": "Text of Question 2",
+        "text": "Text of Question 2"
+        }
+    ]
+    }
+    """
+
+    OneShotGExample: str = """
+    {
+    "role": "Selected Role",
+    "domain": "Selected Domain",
+    "questions": [
+        {
+        "id": "Q1",
+        "text": "Text of Question 1"
+        },
+        {
+        "id": "Q2",
+        "text": "Text of Question 2"
+        },
+        {
+        "id": "Q3",
+        "text": "Text of Question 3"
+        },
+        {
+        "id": "Q4",
+        "text": "Text of Question 4"
+        },
+        {
+        "id": "Q5",
+        "text": "Text of Question 5"
         }
     ]
     }
@@ -165,7 +194,7 @@ class Settings(BaseSettings):
         
         You will be provided with the selected role , selected domain and candidate's context and your will generate two questions based on the following schema
 
-        The JSON object must use the schema: {self.OneShotExample}   
+        The JSON object must use the schema: {self.OneShotGExample}   
         
         """
         return system
@@ -176,7 +205,7 @@ class Settings(BaseSettings):
 
         Candidate Context: {self.CVsummary}
         
-        Generate two questions based on the following schema
+        Generate Five questions based on the given schema
         
         """
 

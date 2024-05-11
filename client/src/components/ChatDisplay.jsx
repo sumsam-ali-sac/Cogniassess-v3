@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 
-const Message = memo(({ msg }) => {
+const Message = memo(({ msg, user }) => {
 	return (
 		<div
 			className={`flex items-center p-4 ${
@@ -25,7 +25,7 @@ const Message = memo(({ msg }) => {
 			</div>
 			{msg.sender === "user" && (
 				<img
-					src="/Streaks logo.png"
+					src={user.avatar}
 					alt="User"
 					className="w-10 h-10 rounded-full ml-3"
 				/>
@@ -34,9 +34,12 @@ const Message = memo(({ msg }) => {
 	);
 });
 
-const ChatDisplay = memo(({ messages, endRef }) => {
+const ChatDisplay = memo(({ messages, user, endRef }) => {
 	const messageElements = React.useMemo(
-		() => messages.map((msg, index) => <Message key={index} msg={msg} />),
+		() =>
+			messages.map((msg, index) => (
+				<Message key={index} msg={msg} user={user} />
+			)),
 		[messages]
 	);
 
