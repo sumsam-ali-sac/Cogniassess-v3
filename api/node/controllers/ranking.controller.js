@@ -20,7 +20,7 @@ export const leaderboard = async (req, res) => {
 		res.json(
 			leaderboard.map((item) => ({
 				username: item.userDetails.username,
-				avater: item.userDetails.avatar,
+				avatar: item.userDetails.avatar,
 				rankScore: item.rankScore,
 			}))
 		);

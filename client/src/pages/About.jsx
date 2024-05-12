@@ -71,7 +71,7 @@ const About = () => {
 			title: "Introduction",
 			content:
 				"COGNIASSESS is dedicated to revolutionizing the recruitment process for non-technical roles by integrating advanced Artificial Intelligence (AI) and user-centric design principles. This platform addresses the need for an efficient, bias-free, and insightful evaluation of non-technical skills in a dynamic job market.",
-			image: "/All LLM.png",
+			image: "/hero section robot.png",
 		},
 	];
 
@@ -88,12 +88,14 @@ const About = () => {
 			title: "Development",
 			content:
 				"During the development phase, our team utilizes advanced Python libraries such as PyTorch and transformers to train our AI model on a diverse range of datasets. This phase also incorporates the fine-tuning of specialized models like Zephyr 7b, Mistral, and Llama 3, ensuring that our AI solutions are robust and tailored to the specific needs of non-technical role assessments.",
+			image: "/Tools.png",
 		},
 		{
 			id: "deployment",
 			title: "Deployment",
 			content:
 				"The deployment phase focuses on integrating the fully trained AI models with the COGNIASSESS platform infrastructure. This step ensures that the platform is scalable, secure, and performs optimally under various operational conditions. Rigorous testing and iterative feedback loops are integral to this phase to guarantee a reliable deployment.",
+			image: "/All LLM.png",
 		},
 	];
 
@@ -107,9 +109,6 @@ const About = () => {
 				{section1.map((section) => (
 					<Section key={section.id} {...section} />
 				))}
-				<div class="mx-auto w-4/6 text-center">
-					<img src="/Objective.png" class="w-full h-auto"></img>
-				</div>
 
 				{section2.map((section) => (
 					<Section key={section.id} {...section} />

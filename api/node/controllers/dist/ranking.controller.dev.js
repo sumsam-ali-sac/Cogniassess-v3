@@ -40,7 +40,7 @@ var leaderboard = function leaderboard(req, res) {
           res.json(_leaderboard.map(function (item) {
             return {
               username: item.userDetails.username,
-              avater: item.userDetails.avatar,
+              avatar: item.userDetails.avatar,
               rankScore: item.rankScore
             };
           }));
