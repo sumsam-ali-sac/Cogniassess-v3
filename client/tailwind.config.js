@@ -31,6 +31,9 @@ export default {
 					height: "8px",
 				},
 			}),
+			animation: {
+				bounce: "bounce 5s infinite",
+			},
 		},
 	},
 	plugins: [require("tailwind-scrollbar")],

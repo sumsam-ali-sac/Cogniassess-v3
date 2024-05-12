@@ -1,56 +1,42 @@
-import {
-	AzureKeyCredential,
-	DocumentAnalysisClient,
-} from "@azure/ai-form-recognizer";
-import dotenv from "dotenv";
-dotenv.config();
+import { config as dotenvConfig } from "dotenv";
+import { MongoClient } from "mongodb";
 
-const key = process.env.AZURE_OCR_KEY;
-const endpoint = process.env.AZURE_OCR_ENDPOINT;
+const uri = process.env.MONGO;
+const client = new MongoClient(uri, {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+});
 
-// sample document
-const formUrl =
-	"https://raw.githubusercontent.com/Azure-Samples/cognitive-services-REST-api-samples/master/curl/form-recognizer/sample-layout.pdf";
+async function updateRandomUserScores() {
+	try {
+		await client.connect();
+		const database = client.db("cogniassess"); // Replace with your actual database name
+		const users = database.collection("users"); // Replace with your actual collection name
+		const ranking = database.collection("rankings"); // Replace with your actual ranking collection name
 
-async function main() {
-	const client = new DocumentAnalysisClient(
-		endpoint,
-		new AzureKeyCredential(key)
-	);
+		// Get random users
+		const sampleUsers = await users
+			.aggregate([{ $sample: { size: 10 } }])
+			.toArray(); // Adjust size as needed
 
-	const poller = await client.beginAnalyzeDocumentFromUrl(
-		"prebuilt-layout",
-		formUrl
-	);
-
-	const { pages, tables } = await poller.pollUntilDone();
-
-	if (pages.length <= 0) {
-		console.log("No pages were extracted from the document.");
-	} else {
-		console.log("Pages:");
-		for (const page of pages) {
-			console.log("- Page", page.pageNumber, `(unit: ${page.unit})`);
-			console.log(`  ${page.width}x${page.height}, angle: ${page.angle}`);
-			console.log(
-				`  ${page.lines.length} lines, ${page.words.length} words`
+		// Update rankScore for each randomly selected user
+		const updates = sampleUsers.map((user) => {
+			const newRankScore = Math.floor(Math.random() * 100) + 1; // Generates a random rankScore between 1 and 100
+			return ranking.updateOne(
+				{ userID: user._id },
+				{ $set: { rankScore: newRankScore } },
+				{ upsert: true }
 			);
-		}
-	}
+		});
 
-	if (tables.length <= 0) {
-		console.log("No tables were extracted from the document.");
-	} else {
-		console.log("Tables:");
-		for (const table of tables) {
-			console.log(
-				`- Extracted table: ${table.columnCount} columns, ${table.rowCount} rows (${table.cells.length} cells)`
-			);
-		}
+		// Execute all updates
+		await Promise.all(updates);
+		console.log("Rank scores updated successfully.");
+	} catch (err) {
+		console.error("Error updating rank scores:", err);
+	} finally {
+		await client.close();
 	}
 }
 
-main().catch((error) => {
-	console.error("An error occurred:", error);
-	process.exit(1);
-});
+updateRandomUserScores();

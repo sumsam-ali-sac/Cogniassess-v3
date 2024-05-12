@@ -5,8 +5,8 @@ const DomainCard = ({ title, imgSrc, onClick, isSelected }) => (
 		}`}
 		onClick={onClick}>
 		<div className="mb-4">
-			{/* <img src={imgSrc} alt={title} className="h-auto w-auto" /> */}
-			<img src="/Domain.png" alt={title} className="h-auto w-auto" />
+			<img src={imgSrc} alt={title} className="h-auto w-auto" />
+			{/* <img src="/Domain.png" alt={title} className="h-auto w-auto" /> */}
 		</div>
 		<div className="role-title text-center text-xl font-bold mb-3 tracking-normal font-worksans">
 			{title}
