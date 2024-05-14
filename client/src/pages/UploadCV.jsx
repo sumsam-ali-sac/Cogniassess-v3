@@ -11,6 +11,7 @@ import ExistingCVDisplay from "../components/ExistingCVDisplay";
 import TextDisplay from "../components/TextDisplay";
 import UploadButton from "../components/UploadButton";
 import Spinner from "../components/Spinner";
+import Modal from "../components/Modal";
 
 function UploadCV() {
 	const user = useSelector((state) => state.user.user);
@@ -25,6 +26,7 @@ function UploadCV() {
 	const [cvProcessed, setCvProcessed] = useState(false);
 	const [cvSummary, setcvSummary] = useState("");
 	const [cvAnalysis, setcvAnalysis] = useState("");
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const navigate = useNavigate();
 
@@ -151,6 +153,15 @@ function UploadCV() {
 		}
 	};
 
+	const handleGenerateAssessment = () => {
+		setIsModalOpen(true);
+	};
+
+	const closeModal = () => {
+		setIsModalOpen(false);
+		navigate("/assessment");
+	};
+
 	return (
 		<div>
 			<Navbar />
@@ -164,11 +175,11 @@ function UploadCV() {
 						<>
 							<ExistingCVDisplay />
 							<div className="flex items-center justify-center gap-8  mt-16 mb-36">
-								<Link
-									to="/assessment"
+								<button
+									onClick={handleGenerateAssessment}
 									className="inline-flex items-center justify-center bg-neon-green font-worksans font-normal text-black px-4 py-2 text-sm md:text-lg cursor-pointer rounded-lg transition-colors border-2 border-neon-green hover:bg-dark-gray hover:text-neon-green w-64 h-12">
 									Generate Assessment
-								</Link>
+								</button>
 								<button
 									onClick={handleUploadAgain}
 									className="inline-flex items-center justify-center bg-neon-green font-worksans font-normal text-black px-4 py-2 text-sm md:text-lg cursor-pointer rounded-lg transition-colors border-2 border-neon-green hover:bg-dark-gray hover:text-neon-green w-64 h-12">
@@ -218,11 +229,11 @@ function UploadCV() {
 								handleFileUpload={handleFileUpload}
 							/>
 							{cvProcessed && (
-								<Link
-									to="/assessment"
+								<button
+									onClick={handleGenerateAssessment}
 									className="mt-5 inline-flex items-center justify-center bg-neon-green font-worksans font-normal text-black px-4 py-2 text-sm md:text-lg cursor-pointer rounded-lg transition-colors border-2 border-neon-green hover:bg-dark-gray hover:text-neon-green w-50 h-12">
 									Generate Assessment
-								</Link>
+								</button>
 							)}
 							<div className="px-4 py-8 mb-36">
 								{cvSummary && (
@@ -248,6 +259,35 @@ function UploadCV() {
 					)}
 				</div>
 			</section>
+			<Modal isOpen={isModalOpen} onClose={closeModal}>
+				<h2 className="text-xl font-rubic text-off-white font-bold mb-4">
+					Assessment Instructions
+				</h2>
+				<p className="mb-4 font-worksans text-off-white ">
+					Please review the instructions carefully before proceeding
+					with the assessment.
+				</p>
+				<ul className="list-disc list-inside mb-4 font-worksans text-off-white ">
+					<li>
+						The assessment will be based on selected domains, each
+						having 5 questions.
+					</li>
+					<li>There will be 3 personality questions.</li>
+					<li>There will be 1 job scenario question.</li>
+					<li>
+						Total allocated will be two hours, once it gets over the
+						assessment will be submitted automatically.
+					</li>
+
+					<li>
+						Answer each question carefully after reading it
+						thoroughly.
+					</li>
+				</ul>
+				<p className="text-off-white font-worksans">
+					Click "Close" to proceed to the assessment.
+				</p>
+			</Modal>
 			<Footer />
 		</div>
 	);

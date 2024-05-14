@@ -60,6 +60,36 @@ class Settings(BaseSettings):
     }
     """
 
+    OneShotPersonalityExample: str = """
+    {
+    "role": "Selected Role",
+    "domain": "Personality",
+    "questions": [
+        {
+        "id": "Q1",
+        "text": "Text of Question 1"
+        },
+        {
+        "id": "Q2",
+        "text": "Text of Question 2"
+        }
+    ]
+    }
+    """
+
+    OneShotJobExample: str = """
+    {
+    "role": "Selected Role",
+    "domain": "Job Scenario",
+    "questions": [
+        {
+        "id": "Q1",
+        "text": "Text of Job scenario"
+        }
+    ]
+    }
+    """
+
     System: str = """
     Your name is CongiAssess. You are an advanced AI system designed to assess professional skills across a range of industries with
     high precision and adaptability. Your capabilities include generating role-specific simulations and evaluations to accurately
@@ -192,9 +222,50 @@ class Settings(BaseSettings):
         practices related to the selected role. 
         
         
-        You will be provided with the selected role , selected domain and candidate's context and your will generate two questions based on the following schema
+        You will be provided with the selected role , selected domain and candidate's context and your will generate questions based on the following schema
 
         The JSON object must use the schema: {self.OneShotGExample}   
+        
+        """
+        return system
+
+    def SystemPromptJobScenarioGenerator(self):
+
+        system = f"""
+        
+        A Candidate has provided his context along with the Role he wants to work for.
+        
+        You are an intelligent job scenario generator that can create a detailed scenario that are directly relevant to the Candidate's selected 
+        role. This scenario should present real-world challenge and task pertinent to the role, enabling the candidate 
+        to demonstrate their skills and competency in the specified role. The scenario should be designed to assess in-depth the candidate's
+        understanding, skills, and application within the role. 
+        
+        You will be provided with the selected role, and the candidate's context. Your task is to generate a single detailed scenario based
+        on the following schema:
+
+        The JSON object must use the schema: {self.OneShotJobExample}   
+        
+        """
+        return system
+
+    def SystemPromptPersonalityGenerator(self):
+
+        system = f"""
+        
+        A Candidate has provided his context along with the Role he wants to work for.
+        
+        You are an intelligent personality assessment generator that can create questions tailored to evaluate the personality traits relevant
+        to the Candidate's selected role. These questions should explore how the candidate's personality aligns with the behavioral
+        requirements and challenges of the role, enabling the candidate to demonstrate their suitability and potential for success in the role.
+        Each question should be crafted to delve into the candidate's behavioral styles, attitudes, and interpersonal skills that are crucial 
+        for the role. The questions should not be generic but should specifically address the nuances and complexities of the role selected. 
+        All questions should align with industry standards and best practices related to the selected role.
+        
+        
+        You will be provided with the selected role, and the candidate's context. Your task is to generate three personality-based questions
+        following the provided schema:
+
+        The JSON object must use the schema: {self.OneShotPersonalityExample}   
         
         """
         return system
@@ -206,6 +277,29 @@ class Settings(BaseSettings):
         Candidate Context: {self.CVsummary}
         
         Generate Five questions based on the given schema
+        
+        """
+
+        return userPrompt
+
+    def UserPromptJob(self, Role: str) -> str:
+        userPrompt = f"""
+        The candidate has Selected Role: {Role}
+
+        Candidate Context: {self.CVsummary}
+        
+        Generate Job scenario JSON question based on the given schema
+        """
+
+        return userPrompt
+
+    def UserPromptPersonality(self, Role: str) -> str:
+        userPrompt = f"""
+        The candidate has Selected Role: {Role}
+
+        Candidate Context: {self.CVsummary}
+        
+        Generate three personality questions based on the given schema
         
         """
 

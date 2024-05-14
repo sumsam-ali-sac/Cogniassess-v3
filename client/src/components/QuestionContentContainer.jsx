@@ -14,13 +14,13 @@ import {
 
 const QuestionContentContainer = ({ entryIndex, entry, domain }) => {
 	const dispatch = useDispatch();
-	dispatch(updateProgress({ entryIndex }));
 	const navigate = useNavigate();
 	const [questions, setQuestions] = useState(entry.questions);
 
 	useEffect(() => {
 		setQuestions(entry.questions);
-	}, [entry.questions]);
+		dispatch(updateProgress({ entryIndex }));
+	}, [entry.questions, dispatch, entryIndex]);
 
 	const handleAnswerChange = (index, value) => {
 		const updatedQuestions = questions.map((question, idx) =>
@@ -51,8 +51,11 @@ const QuestionContentContainer = ({ entryIndex, entry, domain }) => {
 
 	const handleToggleSolved = (question) => {
 		dispatch(toggleSolved({ entryIndex, question }));
-		const updatedQuestion = { ...question, solved: !question.solved };
-		handleSaveQuestion(updatedQuestion);
+		const updatedQuestions = questions.map((q) =>
+			q.id === question.id ? { ...q, solved: !q.solved } : q
+		);
+		setQuestions(updatedQuestions);
+		handleSaveQuestion({ ...question, solved: !question.solved });
 	};
 
 	const goBack = () => {

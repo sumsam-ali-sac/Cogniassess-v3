@@ -246,22 +246,59 @@ async def generate_questions(request: GenerationRequest):
         api_key="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",
     )
 
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "system",
-                "content": settings.SystemPromptQuestionGenerator()
-            },
-            {
-                "role": "user",
-                "content": settings.UserPromptGRoleDomain(request.selectedRole, request.selectedDomain),
-            },
-        ],
-        model="llama3-8b-8192",
-        temperature=0,
-        stream=False,
-        response_format={"type": "json_object"},
-    )
+    if request.selectedDomain != "Personality" and request.selectedDomain != "Job Scenario":
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": settings.SystemPromptQuestionGenerator()
+                },
+                {
+                    "role": "user",
+                    "content": settings.UserPromptGRoleDomain(request.selectedRole, request.selectedDomain),
+                },
+            ],
+            model="llama3-8b-8192",
+            temperature=0,
+            stream=False,
+            response_format={"type": "json_object"},
+        )
+
+    elif request.selectedDomain == "Personality":
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": settings.SystemPromptPersonalityGenerator()
+                },
+                {
+                    "role": "user",
+                    "content": settings.UserPromptPersonality(request.selectedRole),
+                },
+            ],
+            model="llama3-8b-8192",
+            temperature=0,
+            stream=False,
+            response_format={"type": "json_object"},
+        )
+
+    elif request.selectedDomain == "Job Scenario":
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": settings.SystemPromptJobScenarioGenerator()
+                },
+                {
+                    "role": "user",
+                    "content": settings.UserPromptJob(request.selectedRole),
+                },
+            ],
+            model="llama3-8b-8192",
+            temperature=0,
+            stream=False,
+            response_format={"type": "json_object"},
+        )
 
     obj = json.loads(chat_completion.choices[0].message.content)
     print(obj)

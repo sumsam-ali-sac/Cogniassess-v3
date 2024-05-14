@@ -76,7 +76,24 @@ function Domain() {
 	);
 
 	const handleStartClick = () => {
-		dispatch(setSelectedDomains(selectedDomains));
+		const updatedDomains = {
+			...selectedDomains,
+			personality: {
+				id: 1,
+				name: "Personality",
+				status: "Not started yet",
+				iconPath: "",
+				progress: 0,
+			},
+			job: {
+				id: 2,
+				name: "Job Scenario",
+				status: "Not started yet",
+				iconPath: "",
+				progress: 0,
+			},
+		};
+		dispatch(setSelectedDomains(updatedDomains));
 		navigate("/upload-cv");
 	};
 	return (

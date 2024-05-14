@@ -46,6 +46,7 @@ const LeaderboardSection = () => {
 				) : (
 					leaders.map((leader, index) => (
 						<RankingCard
+							key={index}
 							ranking={index + 1}
 							iconName={leader.avatar}
 							title={leader.username}
