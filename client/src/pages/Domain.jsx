@@ -36,6 +36,7 @@ function Domain() {
 				const response = await axios.get(
 					`/api/node/domains/search?role=${encodedRole}`
 				);
+				console.log(response.data.domains);
 				setDomains(response.data.domains);
 				dispatch(setSelectedRole(roleName));
 			} catch (error) {
@@ -58,11 +59,12 @@ function Domain() {
 			if (newSelectedDomains[domain.DomainId]) {
 				delete newSelectedDomains[domain.DomainId];
 			} else {
+				console.log(domain.iconPath);
 				newSelectedDomains[domain.DomainId] = {
 					id: domain.DomainId,
 					name: domain.DomainName,
 					status: "Not started yet",
-					iconPath: domain.IconPath,
+					iconPath: domain.iconPath,
 					progress: 0,
 				};
 			}
@@ -82,14 +84,14 @@ function Domain() {
 				id: 1,
 				name: "Personality",
 				status: "Not started yet",
-				iconPath: "",
+				iconPath: "/Domain Images/personality.png",
 				progress: 0,
 			},
 			job: {
 				id: 2,
 				name: "Job Scenario",
 				status: "Not started yet",
-				iconPath: "",
+				iconPath: "/Domain Images/job_scenario.png",
 				progress: 0,
 			},
 		};

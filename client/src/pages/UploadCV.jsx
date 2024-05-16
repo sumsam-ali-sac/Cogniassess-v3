@@ -159,6 +159,7 @@ function UploadCV() {
 
 	const closeModal = () => {
 		setIsModalOpen(false);
+		localStorage.removeItem("assessmentStartTime");
 		navigate("/assessment");
 	};
 

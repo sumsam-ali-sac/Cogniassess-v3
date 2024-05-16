@@ -226,6 +226,7 @@ class Settings(BaseSettings):
 
         The JSON object must use the schema: {self.OneShotGExample}   
         
+        You must generate syntactically correct JSON accordint to the schema.
         """
         return system
 
@@ -276,7 +277,7 @@ class Settings(BaseSettings):
 
         Candidate Context: {self.CVsummary}
         
-        Generate Five questions based on the given schema
+        Generate Five questions based on the given schema make sure the JSON is generated and is syntactically correct
         
         """
 
@@ -307,11 +308,11 @@ class Settings(BaseSettings):
 
     def UserPromptSummarizeCV(self):
         summary_prompt = f"""
-        Please review the attached CV and provide a concise summary. The summary should capture the candidate's overall professional background, 
+        Please review the attached CV and provide a one paragraph summary without bullet points. The summary should capture the candidate's overall professional background, 
         key skills, and major achievements. Highlight the candidate's educational background, work experience, and any special qualifications 
         or certifications they possess.
         
-        Please keep the summary short in paragraph format
+        Please keep the summary short in paragraph format:
 
         Here are the CV details: {self.CVcontent}
         
