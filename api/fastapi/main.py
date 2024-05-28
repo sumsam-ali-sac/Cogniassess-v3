@@ -167,6 +167,33 @@ async def analyze_cv(data: QuestionAnswerData):
     return {"evaluatation": Evaluation['text'], "points": 100}
 
 
+@app.post("/generate-assessment-questions/")
+async def generate_questions(request: GenerationRequest):
+
+    payload = {
+        "input_variables": {"system": str("Intelligent Assessment Generator"),
+                            "prompt": str(settings.UserPrompt(Role=request.selectedRole, Domain=request.selectedDomain))},
+        "temperature": 0.6,
+        "max_tokens": 200,
+    }
+
+    service_client = settings.GetServiceClient()
+    output = service_client.generate(model="deploy-llm", data=payload)
+    res = json.loads(output)['text'][0].split('\n\n')[0]
+
+    questions_client = settings.getClient()
+    questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
+                                                               ), "max_length": "312", "temprature": 0.8}
+    response = questions_client.generate(model, questions_data)
+
+    print(response)
+    res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
+    res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")
+    obj = json.loads(res)
+    obj["domain"] = request.selectedDomain
+    obj = parse_dict(response['text'])
+
+
 def parse_dict(text):
     dict_obj = {}
     pair_pattern = r'"\s*([^"]+)\s*"\s*:\s*(?:"([^"]*)"|(\{.*?\})|(\[.*?\]))'
@@ -212,35 +239,12 @@ async def generate_questions(request: GenerationRequest):
 
     questions_list = []
 
-    # payload = {
-    #     "input_variables": {"system": str("Intelligent Assessment Generator"),
-    #                         "prompt": str(settings.UserPrompt(Role=request.selectedRole, Domain=request.selectedDomain))},
-    #     "temperature": 0.6,
-    #     "max_tokens": 200,
-    # }
-
-    # service_client = settings.GetServiceClient()
-    # output = service_client.generate(model="deploy-llm", data=payload)
-    # res = json.loads(output)['text'][0].split('\n\n')[0]
-
     print()
     print()
 
     print(request.selectedRole, request.selectedDomain)
     print()
     print()
-
-    # questions_client = mclient(api_key=key)
-    # questions_data = {"prompt": settings.UserPromptLRoleDomain(request.selectedRole, request.selectedDomain
-    #                                                            ), "max_length": "312", "temprature": 0.8}
-    # response = questions_client.generate(model, questions_data)
-
-    # print(response)
-    # res = "\n{\n" + response["text"].split("\n}\n")[0].split("\n{\n")[-1]
-    # res = res.replace(",\n    }", "\n    }").replace(",\n]", "\n]")
-    # obj = json.loads(res)
-    # obj["domain"] = request.selectedDomain
-    # obj = parse_dict(response['text'])
 
     client = Groq(
         api_key="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",
